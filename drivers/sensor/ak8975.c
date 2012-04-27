@@ -117,6 +117,7 @@ static int akmd_copy_in(unsigned int cmd, void __user *argp,
 	return 0;
 }
 
+
 static int akmd_copy_out(unsigned int cmd, void __user *argp,
 			 void *buf, size_t buf_size)
 {
@@ -169,6 +170,7 @@ static int akm8975_wait_for_data_ready(struct akm8975_data *akm)
 		pr_err("akm: wait timed out\n");
 		return -ETIMEDOUT;
 	}
+
 
 	pr_err("akm: wait restart\n");
 	return err;
@@ -244,6 +246,7 @@ static long akmd_ioctl(struct file *file, unsigned int cmd,
 		if (copy_from_user(&rwbuf.raw[2], argp+2, rwbuf.raw[0]-1))
 			return -EFAULT;
 
+
 		ret = i2c_smbus_write_i2c_block_data(akm->this_client,
 						     rwbuf.raw[1],
 						     rwbuf.raw[0] - 1,
@@ -299,6 +302,7 @@ static long akmd_ioctl(struct file *file, unsigned int cmd,
 	default:
 		return -ENOTTY;
 	}
+
 
 	if (ret < 0)
 		return ret;
@@ -442,6 +446,7 @@ static ssize_t ak8975c_get_asa(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	struct akm8975_data *ak_data  = dev_get_drvdata(dev);
+
 
 	return sprintf(buf, "%d, %d, %d\n", ak_data->asa[0],\
 		ak_data->asa[1], ak_data->asa[2]);
@@ -697,8 +702,11 @@ int akm8975_probe(struct i2c_client *client,
 		dev_err(&client->dev, "Error in setting power down mode\n");
 		goto exit_i2c_failed;
 	}
-
+#ifdef CONFIG_MACH_U1_NA_USCC_REV05
+	akm->dev = sensors_classdev_register("compass_sensor");
+#else
 	akm->dev = sensors_classdev_register("magnetic_sensor");
+#endif
 	if (IS_ERR(akm->dev)) {
 		printk(KERN_ERR "Failed to create device!");
 		goto exit_class_create_failed;

@@ -1,0 +1,21 @@
+Initial support for Epic4gTouch
+-requires libMali, and the EGL files from the Intl SGS2 to boot
+
+What Works:
+Sound
+Internal Storage
+External Storage
+WIFI
+BT
+USB
+Touchkeys
+
+What Doesn't Work:
+IDPRAM - driver ported from 2.6 but fails to start
+WiMAX - driver ported from 2.6 but fails to start
+Camera
+Sensors are screwy
+
+Notes:
+- Phone reboots when its unplugged, haven't pulled any logs to see whats causing it yet but I'm guessing its a power/battery issue
+-This will need lots of cleanup once everything works

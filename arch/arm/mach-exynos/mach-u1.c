@@ -57,6 +57,9 @@
 #ifdef CONFIG_ANDROID_PMEM
 #include <linux/android_pmem.h>
 #endif
+#ifdef CONFIG_USBHUB_USB3803
+#include <linux/usb3803.h>
+#endif
 
 #include <asm/mach/arch.h>
 #include <asm/mach-types.h>
@@ -190,6 +193,7 @@
 static struct wacom_g5_callbacks *wacom_callbacks;
 #endif /* CONFIG_EPEN_WACOM_G5SP */
 
+#include <linux/wimax/samsung/wimax732.h>
 
 #if defined(CONFIG_TDMB) || defined(CONFIG_TDMB_MODULE)
 #include <mach/tdmb_pdata.h>
@@ -1265,6 +1269,9 @@ static int ext_cd_cleanup_hsmmc##num(void (*notify_func)( \
 #ifdef CONFIG_S3C_DEV_HSMMC3
 	DEFINE_MMC_CARD_NOTIFIER(3)
 #endif
+#ifdef CONFIG_S3C_DEV_HSMMC2
+	DEFINE_MMC_CARD_NOTIFIER(2)
+#endif
 
 /*
  * call this when you need sd stack to recognize insertion or removal of card
@@ -1276,9 +1283,18 @@ void sdhci_s3c_force_presence_change(struct platform_device *pdev)
 	void (*notify_func)(struct platform_device *, int state) = NULL;
 	mutex_lock(&notify_lock);
 #ifdef CONFIG_S3C_DEV_HSMMC3
-	printk("---------test logs pdev : %p s3c_device_hsmmc3 %p \n",
-		pdev, &s3c_device_hsmmc3);
 	if (pdev == &s3c_device_hsmmc3) {
+		printk("---------test logs pdev : %p s3c_device_hsmmc3 %p \n",
+			pdev, &s3c_device_hsmmc3);
+		notify_func = hsmmc3_notify_func;
+		printk("---------test logs notify_func : %p \n", notify_func);
+	}
+#endif
+#ifdef CONFIG_S3C_DEV_HSMMC2
+
+	if (pdev == &s3c_device_hsmmc2) {
+		printk("---------test logs pdev : %p s3c_device_hsmmc2 %p \n",
+			pdev, &s3c_device_hsmmc2);
 		notify_func = hsmmc3_notify_func;
 		printk("---------test logs notify_func : %p \n", notify_func);
 	}
@@ -1306,10 +1322,14 @@ static struct s3c_sdhci_platdata exynos4_hsmmc0_pdata __initdata = {
 #ifdef CONFIG_S3C_DEV_HSMMC2
 static struct s3c_sdhci_platdata exynos4_hsmmc2_pdata __initdata = {
 	.cd_type = S3C_SDHCI_CD_GPIO,
+#if !defined (CONFIG_MACH_U1_NA_USCC_REV05)
 	.ext_cd_gpio = EXYNOS4_GPX3(4),
+#endif
 	.ext_cd_gpio_invert = 1,
+#if !defined (CONFIG_MACH_U1_NA_USCC_REV05)
 	.clk_type = S3C_SDHCI_CLK_DIV_EXTERNAL,
 	.vmmc_name = "vtf_2.8v",
+#endif
 };
 #endif
 
@@ -4677,6 +4697,12 @@ static struct i2c_board_info i2c_devs3[] __initdata = {
 #ifdef CONFIG_S3C_DEV_I2C4
 /* I2C4 */
 static struct i2c_board_info i2c_devs4[] __initdata = {
+#if defined(CONFIG_WIMAX_CMC) && defined(CONFIG_TARGET_LOCALE_NA)
+	{
+		I2C_BOARD_INFO("max8893_wmx", 0x3E),
+		.platform_data = NULL,
+	},
+#endif /* CONFIG_WIMAX_CMC */
 };
 #endif
 
@@ -4892,6 +4918,43 @@ static struct i2c_board_info i2c_devs10_emul[] __initdata = {
 };
 #endif
 
+#ifdef CONFIG_USBHUB_USB3803
+int usb3803_hw_config(void)
+{
+	int i;
+	int usb_gpio[] = {GPIO_USB_RESET_N, GPIO_USB_BYPASS_N, GPIO_USB_CLOCK_EN};
+
+	for (i = 0; i < 3; i++) {
+		s3c_gpio_cfgpin(usb_gpio[i], S3C_GPIO_OUTPUT);
+		s3c_gpio_setpull(usb_gpio[i], S3C_GPIO_PULL_NONE);
+		gpio_set_value(usb_gpio[i], S3C_GPIO_SETPIN_ZERO);
+		s5p_gpio_set_drvstr(usb_gpio[i], S5P_GPIO_DRVSTR_LV1); /* need to check drvstr 1 or 2 */
+	}
+	return 0;
+}
+
+int usb3803_reset_n(int val)
+{
+	gpio_set_value(GPIO_USB_RESET_N, !!val);
+	
+	return 0;
+}
+
+int usb3803_bypass_n(int val)
+{
+	gpio_set_value(GPIO_USB_BYPASS_N, !!val);
+	
+	return 0;
+}
+
+int usb3803_clock_en(int val)
+{
+	gpio_set_value(GPIO_USB_CLOCK_EN, !!val);
+	
+	return 0;
+}
+#endif /* CONFIG_USBHUB_USB3803 */
+
 #ifdef CONFIG_S3C_DEV_I2C11_EMUL
 static struct i2c_gpio_platform_data gpio_i2c_data11 = {
 	.sda_pin = GPIO_PS_ALS_SDA,
@@ -5068,6 +5131,60 @@ static struct i2c_board_info i2c_devs12_emul[] __initdata = {
 	/* need to work here */
 };
 #endif
+
+#if defined(CONFIG_WIMAX_CMC) && defined(CONFIG_TARGET_LOCALE_NA)
+static struct i2c_gpio_platform_data wmxeeprom_i2c_gpio_data = {
+	.sda_pin  = GPIO_CMC_SDA_18V,
+	.scl_pin  = GPIO_CMC_SCL_18V,
+	.udelay = 2,
+};
+static struct platform_device wmxeeprom_i2c_gpio_device = {
+	.name	= "i2c-gpio",
+	.id	= 18,
+	.dev	= {
+		.platform_data  = &wmxeeprom_i2c_gpio_data,
+	},
+};
+static struct i2c_board_info wmxeeprom_i2c_devices[] __initdata = {
+{
+	I2C_BOARD_INFO("wmxeeprom", 0x50),
+}
+};
+
+#endif /* CONFIG_WIMAX_CMC */
+
+#ifdef CONFIG_S3C_DEV_I2C17_EMUL
+/* I2C17_EMUL */
+static struct i2c_gpio_platform_data i2c17_platdata = {
+	.sda_pin = GPIO_USB_I2C_SDA,
+	.scl_pin = GPIO_USB_I2C_SCL,
+};
+
+struct platform_device s3c_device_i2c17 = {
+	.name = "i2c-gpio",
+	.id = 17,
+	.dev.platform_data = &i2c17_platdata,
+};
+#endif /* CONFIG_S3C_DEV_I2C17_EMUL */
+
+#ifdef CONFIG_USBHUB_USB3803
+struct usb3803_platform_data usb3803_pdata = {
+	.init_needed    =  1,
+	.es_ver         = 1,
+	.inital_mode    = USB_3803_MODE_STANDBY,
+	.hw_config      = usb3803_hw_config,
+	.reset_n        = usb3803_reset_n,
+	.bypass_n       = usb3803_bypass_n,
+	.clock_en       = usb3803_clock_en,
+};
+
+static struct i2c_board_info i2c_devs17_emul[] __initdata = {
+	{
+		I2C_BOARD_INFO(USB3803_I2C_NAME, 0x08),
+		.platform_data  = &usb3803_pdata,
+	},
+};
+#endif /* CONFIG_USBHUB_USB3803 */
 
 #ifdef CONFIG_FM_SI4709_MODULE
 static struct i2c_gpio_platform_data i2c16_platdata = {
@@ -5524,7 +5641,9 @@ static struct platform_device *smdkc210_devices[] __initdata = {
 	&exynos4_device_pd[PD_LCD1],
 	&exynos4_device_pd[PD_CAM],
 	&exynos4_device_pd[PD_TV],
+#ifndef CONFIG_TARGET_LOCALE_NA
 	&exynos4_device_pd[PD_GPS],
+#endif
 
 #ifdef CONFIG_BATTERY_SAMSUNG
 	&samsung_device_battery,
@@ -5571,11 +5690,17 @@ static struct platform_device *smdkc210_devices[] __initdata = {
 #if defined(CONFIG_S3C_DEV_I2C14_EMUL)
 	&s3c_device_i2c14,
 #endif
+#if defined(CONFIG_S3C_DEV_I2C17_EMUL)
+	&s3c_device_i2c17,	/* USB HUB */
+#endif
 #if defined(CONFIG_VIDEO_S5K5BAFX)
 	&s3c_device_i2c12,
 #endif
 #ifdef CONFIG_SAMSUNG_MHL
 		&s3c_device_i2c15,
+#endif
+#if defined(CONFIG_WIMAX_CMC) && defined(CONFIG_TARGET_LOCALE_NA)
+	&wmxeeprom_i2c_gpio_device,
 #endif
 #ifdef CONFIG_FM_SI4709_MODULE
 	&s3c_device_i2c16,
@@ -5693,6 +5818,9 @@ static struct platform_device *smdkc210_devices[] __initdata = {
 	&s5p_device_tvout,
 	&s5p_device_cec,
 	&s5p_device_hpd,
+#endif
+#if defined(CONFIG_WIMAX_CMC) && defined(CONFIG_TARGET_LOCALE_NA)
+	&s3c_device_cmc732,
 #endif
 #ifdef CONFIG_ANDROID_RAM_CONSOLE
 	&ram_console_device,
@@ -6210,9 +6338,15 @@ static void __init smdkc210_machine_init(void)
 	nfc_setup_gpio();
 	i2c_register_board_info(14, i2c_devs14, ARRAY_SIZE(i2c_devs14));
 #endif
+#ifdef CONFIG_S3C_DEV_I2C17_EMUL
+	i2c_register_board_info(17, i2c_devs17_emul, ARRAY_SIZE(i2c_devs17_emul));
+#endif
 #if defined(CONFIG_VIDEO_S5K5BAFX)
 	i2c_register_board_info(12, i2c_devs12_emul,
 				ARRAY_SIZE(i2c_devs12_emul));
+#endif
+#if defined(CONFIG_WIMAX_CMC) && defined(CONFIG_TARGET_LOCALE_NA)
+	i2c_register_board_info(18, wmxeeprom_i2c_devices, ARRAY_SIZE(wmxeeprom_i2c_devices));
 #endif
 #ifdef CONFIG_FM_SI4709_MODULE
 	i2c_register_board_info(16, i2c_devs16, ARRAY_SIZE(i2c_devs16));

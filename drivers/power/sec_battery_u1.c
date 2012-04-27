@@ -861,7 +861,7 @@ static int sec_bat_check_temper(struct sec_bat_info *info)
 	int high = 0;
 	int mid = 0;
 
-	/*calculate_average_adc(info, &info->temper_adc_sample, temp_adc);*/
+	//calculate_average_adc(info, &info->temper_adc_sample, temp_adc);
 
 	if (!info->adc_table || !info->adc_arr_size) {
 		/* using fake temp */
@@ -884,163 +884,192 @@ static int sec_bat_check_temper(struct sec_bat_info *info)
 
 	info->batt_temp = temp;
 
+//	dev_info(info->dev, "[test] temp_radc_value : %d \n",
+//					__func__, temp_radc);
+
 	if (info->get_lpcharging_state) {
 		if (info->get_lpcharging_state()) {
 			if (temp_radc >= HIGH_BLOCK_TEMP_ADC_LPM) {
 				if (health != POWER_SUPPLY_HEALTH_OVERHEAT &&
-				    health !=
-				    POWER_SUPPLY_HEALTH_UNSPEC_FAILURE)
-					if (info->batt_temp_high_cnt <
-					    TEMP_BLOCK_COUNT)
-						info->batt_temp_high_cnt++;
+				health != POWER_SUPPLY_HEALTH_UNSPEC_FAILURE)
+
+				if (info->batt_temp_high_cnt < TEMP_BLOCK_COUNT)
+
+
+					info->batt_temp_high_cnt++;
 				dev_info(info->dev, "%s: high count = %d\n",
-					 __func__, info->batt_temp_high_cnt);
-			} else if (temp_radc <= HIGH_RECOVER_TEMP_ADC_LPM &&
-				   temp_radc >= LOW_RECOVER_TEMP_ADC_LPM) {
+				__func__, info->batt_temp_high_cnt);
+			} else if (temp_radc <= HIGH_RECOVER_TEMP_ADC_LPM && temp_radc >= LOW_RECOVER_TEMP_ADC_LPM) {
+
 				if (health == POWER_SUPPLY_HEALTH_OVERHEAT ||
-				    health == POWER_SUPPLY_HEALTH_COLD) {
+				health == POWER_SUPPLY_HEALTH_COLD){
 					info->batt_temp_high_cnt = 0;
 					info->batt_temp_low_cnt = 0;
 
-					if (info->batt_temp_recover_cnt <
-					    TEMP_BLOCK_COUNT)
+				if (info->batt_temp_recover_cnt < TEMP_BLOCK_COUNT)
+
 						info->batt_temp_recover_cnt++;
-					dev_info(info->dev,
-						 "%s: recovery count = %d\n",
-						 __func__,
-						 info->batt_temp_recover_cnt);
+					dev_info(info->dev, "%s: recovery count = %d\n",
+
+					__func__, info->batt_temp_recover_cnt);
+
 				}
 			} else if (temp_radc <= LOW_BLOCK_TEMP_ADC_LPM) {
 				if (health != POWER_SUPPLY_HEALTH_COLD &&
-				    health !=
-				    POWER_SUPPLY_HEALTH_UNSPEC_FAILURE)
-					if (info->batt_temp_low_cnt <
-					    TEMP_BLOCK_COUNT)
-						info->batt_temp_low_cnt++;
+				health != POWER_SUPPLY_HEALTH_UNSPEC_FAILURE)
+
+				if (info->batt_temp_low_cnt < TEMP_BLOCK_COUNT)
+
+
+					info->batt_temp_low_cnt++;
 				dev_info(info->dev, "%s: low count = %d\n",
-					 __func__, info->batt_temp_low_cnt);
+				__func__, info->batt_temp_low_cnt);
 			} else {
 				info->batt_temp_high_cnt = 0;
 				info->batt_temp_low_cnt = 0;
 				info->batt_temp_recover_cnt = 0;
 			}
+
 		} else {
-			if ((info->batt_event_status)
-			    || (is_event_end_timer_running(info))) {
-				dev_info(info->dev,
-					 "[NA_SPR] Changed Put off Current",
-					 __func__);
+			if((info->batt_event_status) || (is_event_end_timer_running(info))){
+
+									dev_info(info->dev,
+						 "%s: high count = %d\n",
+						 __func__,
+						 info->batt_temp_high_cnt);
+
+
 				if (temp_radc >= EVENT_BLOCK_TEMP_ADC) {
-					if (health !=
-					    POWER_SUPPLY_HEALTH_OVERHEAT
-					    && health !=
-					    POWER_SUPPLY_HEALTH_UNSPEC_FAILURE)
-						if (info->batt_temp_high_cnt <
-						    TEMP_BLOCK_COUNT)
-							info->
-							    batt_temp_high_cnt++;
-					dev_info(info->dev,
-						 "%s: high count = %d\n",
-						 __func__,
-						 info->batt_temp_high_cnt);
-				} else if (temp_radc <= HIGH_RECOVER_TEMP_ADC
-					   && temp_radc >=
-					   LOW_RECOVER_TEMP_ADC) {
-					if (health ==
-					    POWER_SUPPLY_HEALTH_OVERHEAT
-					    || health ==
-					    POWER_SUPPLY_HEALTH_COLD) {
+					if (health != POWER_SUPPLY_HEALTH_OVERHEAT &&
+
+					health != POWER_SUPPLY_HEALTH_UNSPEC_FAILURE)
+
+					if (info->batt_temp_high_cnt < TEMP_BLOCK_COUNT)
+
+
+
+						info->batt_temp_high_cnt++;
+					dev_info(info->dev, "%s: high count = %d\n",
+
+						__func__, info->batt_temp_high_cnt);
+
+				} else if (temp_radc <= HIGH_RECOVER_TEMP_ADC && temp_radc >= LOW_RECOVER_TEMP_ADC) {
+
+
+					if (health == POWER_SUPPLY_HEALTH_OVERHEAT ||
+
+					health == POWER_SUPPLY_HEALTH_COLD){
+
+
 						info->batt_temp_high_cnt = 0;
 						info->batt_temp_low_cnt = 0;
 
-						if (info->
-						    batt_temp_recover_cnt <
-						    TEMP_BLOCK_COUNT)
-							info->
-							    batt_temp_recover_cnt++;
-						dev_info(info->dev,
-							 "%s: recovery count = %d\n",
-							 __func__,
-							 info->
-							 batt_temp_recover_cnt);
+					if (info->batt_temp_recover_cnt < TEMP_BLOCK_COUNT)
+
+
+
+
+							info->batt_temp_recover_cnt++;
+						dev_info(info->dev, "%s: recovery count = %d\n",
+
+							__func__, info->batt_temp_recover_cnt);
+
+
 					}
 				} else if (temp_radc <= LOW_BLOCK_TEMP_ADC) {
-					if (health != POWER_SUPPLY_HEALTH_COLD
-					    && health !=
-					    POWER_SUPPLY_HEALTH_UNSPEC_FAILURE)
-						if (info->batt_temp_low_cnt <
-						    TEMP_BLOCK_COUNT)
-							info->
-							    batt_temp_low_cnt++;
-					dev_info(info->dev,
-						 "%s: low count = %d\n",
-						 __func__,
-						 info->batt_temp_low_cnt);
+					if (health != POWER_SUPPLY_HEALTH_COLD &&
+						health != POWER_SUPPLY_HEALTH_UNSPEC_FAILURE)
+
+					if (info->batt_temp_low_cnt < TEMP_BLOCK_COUNT)
+
+
+
+						info->batt_temp_low_cnt++;
+					dev_info(info->dev, "%s: low count = %d\n",
+
+						__func__, info->batt_temp_low_cnt);
+
 				} else {
 					info->batt_temp_high_cnt = 0;
 					info->batt_temp_low_cnt = 0;
 					info->batt_temp_recover_cnt = 0;
 				}
-			} else {
-				if (temp_radc >= HIGH_BLOCK_TEMP_ADC) {
-					if (health !=
-					    POWER_SUPPLY_HEALTH_OVERHEAT
-					    && health !=
-					    POWER_SUPPLY_HEALTH_UNSPEC_FAILURE)
-						if (info->batt_temp_high_cnt <
-						    TEMP_BLOCK_COUNT)
-							info->
-							    batt_temp_high_cnt++;
-					dev_info(info->dev,
-						 "%s: high count = %d\n",
-						 __func__,
-						 info->batt_temp_high_cnt);
-				} else if (temp_radc <= HIGH_RECOVER_TEMP_ADC
-					   && temp_radc >=
-					   LOW_RECOVER_TEMP_ADC) {
-					if (health ==
-					    POWER_SUPPLY_HEALTH_OVERHEAT
-					    || health ==
-					    POWER_SUPPLY_HEALTH_COLD) {
+				}else {
+					if (temp_radc >= HIGH_BLOCK_TEMP_ADC) {
+						if (health != POWER_SUPPLY_HEALTH_OVERHEAT &&
 
-						info->batt_temp_high_cnt = 0;
-						info->batt_temp_low_cnt = 0;
 
-						if (info->
-						    batt_temp_recover_cnt <
-						    TEMP_BLOCK_COUNT)
-							info->
-							    batt_temp_recover_cnt++;
-						dev_info(info->dev,
-							 "%s: recovery count = %d\n",
-							 __func__,
-							 info->
-							 batt_temp_recover_cnt);
+						health != POWER_SUPPLY_HEALTH_UNSPEC_FAILURE)
+
+						if (info->batt_temp_high_cnt < TEMP_BLOCK_COUNT)
+
+
+
+							info->batt_temp_high_cnt++;
+						dev_info(info->dev, "%s: high count = %d\n",
+
+							__func__, info->batt_temp_high_cnt);
+
+						} else if (temp_radc <= HIGH_RECOVER_TEMP_ADC && temp_radc >= LOW_RECOVER_TEMP_ADC) {
+
+
+							if (health == POWER_SUPPLY_HEALTH_OVERHEAT ||
+
+							health == POWER_SUPPLY_HEALTH_COLD){
+
+
+								info->batt_temp_high_cnt = 0;
+								info->batt_temp_low_cnt = 0;
+
+							if (info->batt_temp_recover_cnt < TEMP_BLOCK_COUNT)
+
+
+									info->batt_temp_recover_cnt++;
+
+								dev_info(info->dev, "%s: recovery count = %d\n",
+
+									__func__, info->batt_temp_recover_cnt);
+
+
+							}
+						} else if (temp_radc <= LOW_BLOCK_TEMP_ADC) {
+							if (health != POWER_SUPPLY_HEALTH_COLD &&
+								health != POWER_SUPPLY_HEALTH_UNSPEC_FAILURE)
+							if (info->batt_temp_low_cnt < TEMP_BLOCK_COUNT)
+								info->batt_temp_low_cnt++;
+							dev_info(info->dev, "%s: low count = %d\n",
+								__func__, info->batt_temp_low_cnt);
+						} else {
+							info->batt_temp_high_cnt = 0;
+							info->batt_temp_low_cnt = 0;
+							info->batt_temp_recover_cnt = 0;
+						}
 					}
-				} else if (temp_radc <= LOW_BLOCK_TEMP_ADC) {
-					if (health != POWER_SUPPLY_HEALTH_COLD
-					    && health !=
-					    POWER_SUPPLY_HEALTH_UNSPEC_FAILURE)
-						if (info->batt_temp_low_cnt <
-						    TEMP_BLOCK_COUNT)
-							info->
-							    batt_temp_low_cnt++;
-					dev_info(info->dev,
-						 "%s: low count = %d\n",
-						 __func__,
-						 info->batt_temp_low_cnt);
-				} else {
-					info->batt_temp_high_cnt = 0;
-					info->batt_temp_low_cnt = 0;
-					info->batt_temp_recover_cnt = 0;
-				}
-			}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 		}
 	}
 
-	if (info->cable_type == CABLE_TYPE_NONE) {
-		if (info->batt_health == POWER_SUPPLY_HEALTH_OVERHEAT ||
-		    info->batt_health == POWER_SUPPLY_HEALTH_COLD) {
+	if (info->cable_type ==CABLE_TYPE_NONE) {
+		if (info->batt_health == POWER_SUPPLY_HEALTH_OVERHEAT || info->batt_health == POWER_SUPPLY_HEALTH_COLD) {
+
 			info->batt_health = POWER_SUPPLY_HEALTH_GOOD;
 			goto skip;
 		}
@@ -1054,11 +1083,11 @@ static int sec_bat_check_temper(struct sec_bat_info *info)
 		info->batt_health = POWER_SUPPLY_HEALTH_GOOD;
 
 	/*else
-	   info->batt_health = POWER_SUPPLY_HEALTH_GOOD; */
+		info->batt_health = POWER_SUPPLY_HEALTH_GOOD;*/
 
 	/*else if (info->batt_temp_recover_cnt >= TEMP_BLOCK_COUNT)
-	   info->batt_health = POWER_SUPPLY_HEALTH_GOOD; */
- skip:
+		info->batt_health = POWER_SUPPLY_HEALTH_GOOD;*/
+skip:
 	/* Set temperature to fuel gauge */
 	if (info->fuel_gauge_name) {
 		value.intval = info->batt_temp / 10;
@@ -2440,12 +2469,12 @@ static void sec_bat_check_event_status(struct sec_bat_info *info, int mode,
 	return;
 }
 
-int sec_bat_use_wimax(int onoff)
+/*int sec_bat_use_wimax(int onoff)
 {
-	struct sec_bat_info *info = pchg;
-	sec_bat_check_event_status(info, onoff, USE_WIMAX);
+	struct sec_bat_info *info = pchg ;
+	sec_bat_check_event_status(info, onoff, USE_WIMAX) ;
 }
-EXPORT_SYMBOL(sec_bat_use_wimax);
+EXPORT_SYMBOL(sec_bat_use_wimax) ;*/
 #endif
 
 static ssize_t sec_bat_show_property(struct device *dev,
@@ -2989,26 +3018,26 @@ static int sec_bat_read_proc(char *buf, char **start,
 	cur_time = ktime_to_timespec(ktime);
 
 #ifdef CONFIG_TARGET_LOCALE_NA
-	len = sprintf(buf,
-		      "%lu, %u, %u, %u, %u, %u, %d, %d, %d, %u, %u, %u, %u, %u, %u, %u, %d, %lu\n",
-		      cur_time.tv_sec,
-		      info->batt_raw_soc,
-		      info->batt_soc,
-		      info->batt_vfocv,
-		      info->batt_vcell,
-		      info->batt_current_adc,
-              info->batt_chg_current,
-		      info->batt_full_status,
-		      info->charging_int_full_count,
-		      info->charging_adc_full_count,
-		      info->recharging_status,
-		      info->batt_temp_adc,
-		      info->batt_temp_radc,
-		      info->batt_health,
-		      info->charging_status,
-		      info->batt_tmu_status,
-		      info->present,
-		      info->cable_type, info->charging_passed_time);
+	len = sprintf(buf, "%lu, %u, %u, %u, %u, %u, %d, %d, %d, \
+%u, %u, %u, %u, %u, %u, %u, %d, %lu\n",
+		cur_time.tv_sec,
+		info->batt_raw_soc,
+		info->batt_soc,
+		info->batt_vfocv,
+		info->batt_vcell,
+		info->batt_current_adc,
+		info->batt_full_status,
+		info->charging_int_full_count,
+		info->charging_adc_full_count,
+		info->recharging_status,
+		info->batt_temp_adc,
+		info->batt_temp_radc,
+		info->batt_health,
+		info->charging_status,
+		info->batt_tmu_status,
+		info->present,
+		info->cable_type,
+		info->charging_passed_time);
 
 	return len;
 }

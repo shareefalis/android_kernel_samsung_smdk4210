@@ -19,6 +19,7 @@
 #define MXT224_DEV_NAME "Atmel MXT224"
 
 #define MXT224_MAX_MT_FINGERS		10
+#define MXT224E_THRESHOLD		50
 
 enum {
 	RESERVED_T0 = 0,

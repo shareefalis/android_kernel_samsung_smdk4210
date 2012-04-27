@@ -274,6 +274,7 @@ static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
 {
 	struct sdhci_s3c *ourhost = to_s3c(host);
 
+
 	/* don't bother if the clock is going off */
 	if (clock == 0)
 		return;
@@ -803,7 +804,16 @@ static int sdhci_s3c_suspend(struct platform_device *dev, pm_message_t pm)
 static int sdhci_s3c_resume(struct platform_device *dev)
 {
 	struct sdhci_host *host = platform_get_drvdata(dev);
-
+#if defined(CONFIG_WIMAX_CMC) && defined(CONFIG_TARGET_LOCALE_NA)
+      	struct s3c_sdhci_platdata *pdata = dev->dev.platform_data;
+	u32 ier;
+	if (pdata->enable_intr_on_resume) {
+                ier = sdhci_readl(host, SDHCI_INT_ENABLE);
+                ier |= SDHCI_INT_CARD_INT;
+                sdhci_writel(host, ier, SDHCI_INT_ENABLE);
+                sdhci_writel(host, ier, SDHCI_SIGNAL_ENABLE);
+        } 
+#endif
 #ifdef CONFIG_MACH_MIDAS_01_BD
 	/* turn vdd_tflash off if a card exists*/
 	if (sdhci_s3c_get_card_exist(host))

@@ -5,6 +5,7 @@
 menuconfig WESTBRIDGE
 	tristate "West Bridge support"
 	depends on WESTBRIDGE_HAL_SELECTED
+#	default y
 	help
 	  This selects West Bridge Peripheral controller support.
 
@@ -13,6 +14,7 @@ menuconfig WESTBRIDGE
 menuconfig WESTBRIDGE_ASTORIA
 	bool "West Bridge Astoria support"
 	depends on WESTBRIDGE != n && WESTBRIDGE_HAL_SELECTED
+#	default y
 	help
 		This option enables support for West Bridge Astoria
 
@@ -20,7 +22,13 @@ if WESTBRIDGE_ASTORIA
 source "drivers/staging/westbridge/astoria/Kconfig"
 endif #WESTBRIDGE_ASTORIA
 
-config	WESTBRIDGE_HAL_SELECTED
+#menuconfig MACH_OMAP3_WESTBRIDGE_AST_PNAND_HAL
+#	bool "WESTBRIDGE OMAP3430 Astoria PNAND HAL"
+#	depends on ARCH_OMAP3 && WESTBRIDGE_ASTORIA
+#	help
+#		Include the OMAP3430 HAL for PNAND interface
+
+config WESTBRIDGE_HAL_SELECTED
 	boolean
 
 choice
@@ -39,6 +47,31 @@ config MACH_OMAP3_WESTBRIDGE_AST_PNAND_HAL
 	help
 	   Include the OMAP3430 HAL for PNAND interface
 
+config MACH_OMAP3_WESTBRIDGE_AST_CRAM_HAL
+	bool "WESTBRIDGE OMAP3430 Astoria CRAM HAL"
+	depends on ARCH_OMAP3
+	select WESTBRIDGE_HAL_SELECTED
+	help
+	   Include the OMAP3430 HAL for PNAND interface
+
+# config MACH_QC_WESTBRIDGE_AST_HAL
+#	bool "WESTBRIDGE QC Astoria HAL"
+#	select WESTBRIDGE_HAL_SELECTED
+#	help
+#	   Include the QC HAL for ADMux interface
+
+# config MACH_C110_WESTBRIDGE_AST_CRAM_HAL
+#	bool "WESTBRIDGE C110 Astoria CRAM HAL"
+#	select WESTBRIDGE_HAL_SELECTED
+#	help
+#	   Include the C110 HAL for CRAM interface
+
+config MACH_C110_WESTBRIDGE_AST_PNAND_HAL
+	bool "WESTBRIDGE C110 Astoria PNAND HAL"
+	select WESTBRIDGE_HAL_SELECTED
+	help
+	   Include the C110 HAL for PNAND interface
+
 config MACH_NO_WESTBRIDGE
 	bool "no West Bridge HAL selected"
 	help
@@ -48,6 +81,7 @@ endchoice
 config WESTBRIDGE_DEBUG
 	bool "West Bridge debugging"
 	depends on WESTBRIDGE != n
+	default y
 	help
 	  This is an option for use by developers; most people should
 	  say N here.  This enables WESTBRIDGE core and driver debugging.

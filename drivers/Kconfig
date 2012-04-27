@@ -148,4 +148,6 @@ source "drivers/irda/Kconfig"
 
 source "drivers/extcon/Kconfig"
 
+source "drivers/dpram/Kconfig"
+
 endmenu

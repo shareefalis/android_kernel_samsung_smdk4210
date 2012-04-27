@@ -14,6 +14,9 @@ config TARGET_LOCALE_KOR
 config TARGET_LOCALE_NAATT_TEMP
 	bool "NAGSM"
 
+config TARGET_LOCALE_NA
+	bool "NACDMA"
+	
 config TARGET_LOCALE_EUR_U1_NFC
 	bool "Europe Open NFC"
 
@@ -22,6 +25,16 @@ config TARGET_LOCALE_NTT
 
 config TARGET_LOCALE_CHN
 	bool "Chinese"
+
+endchoice
+
+choice
+        prompt "U1 USCC Carrier"
+        depends on MACH_U1 && TARGET_LOCALE_NA
+        default MACH_U1_NA_USCC_REV05
+
+config MACH_U1_NA_USCC_REV05
+        bool "USCC"
 
 endchoice
 

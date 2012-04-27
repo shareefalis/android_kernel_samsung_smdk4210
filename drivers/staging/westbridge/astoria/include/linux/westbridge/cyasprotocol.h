@@ -756,7 +756,7 @@
 	 * 1 : Debug mode
 
    Description
-   This response is sent to return the firmware version
+   This reponse is sent to return the firmware version
    number to the requestor.
  */
 #define CY_RESP_FIRMWARE_VERSION (16)
@@ -955,6 +955,7 @@
 	 * CY_RQT_SDIO_RESUME
 	 * CY_RQT_SDIO_RESET_DEV
 	 * CY_RQT_P2S_DMA_START
+         * CY_RQT_CHANGE_SD_FREQ
  */
 #ifndef __doxygen__
 #define CY_RQT_STORAGE_RQT_CONTEXT (2)
@@ -1946,6 +1947,34 @@
 	* CY_RESP_SUCCESS_FAILURE:CY_AS_ERROR_SUCCESS
 */
 #define CY_RQT_P2S_DMA_START (35)
+
+/* Summary
+   Changes the operating frequency of the SD card dynamically.
+
+   Direction
+   P Port Processor -> West Bridge
+
+   Length (in transfers)
+   1
+
+   MailBox0
+    * Context = 2
+    * Request code = 36
+
+   D0
+   Bits 12 - 15 : Bus number
+   Bits  8 - 11 : Device number
+   Bits  0 -  7 : Not used
+
+   D1
+   Bits  7 -  0 : Clock source setting
+   Bits 15 -  8 : Clock divider setting
+
+   Responses
+    * CY_RESP_SUCCESS_FAILURE
+ */
+#define CY_RQT_CHANGE_SD_FREQ (36)
+
 
 /******************************************************/
 
@@ -3655,7 +3684,7 @@
    This request is sent to the West Bridge when the P port
    needs to send data to the Host in a Turbo Endpoint.
    Upon receiving this event, Firmware will make the end point
-   available for the P port. If the length is zero, then
+   avilable for the P port. If the length is zero, then
    firmware will send a zero length packet.
 
    Direction

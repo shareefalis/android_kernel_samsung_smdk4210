@@ -198,6 +198,36 @@ void blk_dump_rq_flags(struct request *rq, char *msg)
 }
 EXPORT_SYMBOL(blk_dump_rq_flags);
 
+/*
+ * "plug" the device if there are no outstanding requests: this will
+ * force the transfer to start only after we have put all the requests
+ * on the list.
+ *
+ * This is called with interrupts off and no requests on the queue and
+ * with the queue lock held.
+ */
+void blk_plug_device(struct request_queue *q)
+{
+	WARN_ON(!irqs_disabled());
+
+	/*
+	 * don't plug a stopped queue, it must be paired with blk_start_queue()
+	 * which will restart the queueing
+	 */
+	if (blk_queue_stopped(q))
+		return;
+
+
+	if (!queue_flag_test_and_set(QUEUE_FLAG_PLUGGED, q)) {
+		mod_timer(&q->unplug_timer, jiffies + q->unplug_delay);
+		trace_block_plug(q);
+	}
+
+
+
+
+}
+EXPORT_SYMBOL(blk_plug_device);
 static void blk_delay_work(struct work_struct *work)
 {
 	struct request_queue *q;
@@ -1198,6 +1228,7 @@ void init_request_from_bio(struct request *req, struct bio *bio)
 	if (bio->bi_rw & REQ_RAHEAD)
 		req->cmd_flags |= REQ_FAILFAST_MASK;
 
+
 	req->errors = 0;
 	req->__sector = bio->bi_sector;
 	req->ioprio = bio_prio(bio);
@@ -1210,6 +1241,7 @@ static int __make_request(struct request_queue *q, struct bio *bio)
 	struct blk_plug *plug;
 	int el_ret, rw_flags, where = ELEVATOR_INSERT_SORT;
 	struct request *req;
+
 
 	/*
 	 * low level driver can indicate that it wants pages above a

@@ -92,6 +92,7 @@ struct s3c_sdhci_platdata {
 			    void __iomem *regbase,
 			    struct mmc_ios *ios,
 			    struct mmc_card *card);
+	int enable_intr_on_resume;
 #ifdef CONFIG_MACH_PX
 	int (*ext_pdev)(struct platform_device *dev_id);
 #endif
@@ -204,6 +205,7 @@ static inline void s3c6400_default_sdhci1(void)
 #endif
 }
 
+
 static inline void s3c6400_default_sdhci2(void)
 {
 #ifdef CONFIG_S3C_DEV_HSMMC2
@@ -227,6 +229,7 @@ static inline void s3c6410_default_sdhci0(void)
 #endif
 }
 
+
 static inline void s3c6410_default_sdhci1(void)
 {
 #ifdef CONFIG_S3C_DEV_HSMMC1
@@ -235,6 +238,7 @@ static inline void s3c6410_default_sdhci1(void)
 	s3c_hsmmc1_def_platdata.cfg_card = s3c6410_setup_sdhci_cfg_card;
 #endif
 }
+
 
 static inline void s3c6410_default_sdhci2(void)
 {
@@ -274,6 +278,7 @@ static inline void s5pc100_default_sdhci0(void)
 #endif
 }
 
+
 static inline void s5pc100_default_sdhci1(void)
 {
 #ifdef CONFIG_S3C_DEV_HSMMC1
@@ -282,6 +287,7 @@ static inline void s5pc100_default_sdhci1(void)
 	s3c_hsmmc1_def_platdata.cfg_card = s5pc100_setup_sdhci0_cfg_card;
 #endif
 }
+
 
 static inline void s5pc100_default_sdhci2(void)
 {
@@ -318,6 +324,7 @@ static inline void s5pv210_default_sdhci0(void)
 #endif
 }
 
+
 static inline void s5pv210_default_sdhci1(void)
 {
 #ifdef CONFIG_S3C_DEV_HSMMC1
@@ -327,6 +334,7 @@ static inline void s5pv210_default_sdhci1(void)
 #endif
 }
 
+
 static inline void s5pv210_default_sdhci2(void)
 {
 #ifdef CONFIG_S3C_DEV_HSMMC2
@@ -335,6 +343,7 @@ static inline void s5pv210_default_sdhci2(void)
 	s3c_hsmmc2_def_platdata.cfg_card = s5pv210_setup_sdhci_cfg_card;
 #endif
 }
+
 
 static inline void s5pv210_default_sdhci3(void)
 {

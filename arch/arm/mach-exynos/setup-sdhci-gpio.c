@@ -22,6 +22,12 @@
 #include <plat/gpio-cfg.h>
 #include <plat/regs-sdhci.h>
 #include <plat/sdhci.h>
+#include <mach/map.h>
+
+#define GPK3DRV	(EXYNOS4_VA_GPIO2 + 0xAC)
+
+extern int s3c_gpio_slp_cfgpin(unsigned int pin, unsigned int config);
+extern int s3c_gpio_slp_setpull_updown(unsigned int pin, unsigned int config);
 
 void exynos4_setup_sdhci0_cfg_gpio(struct platform_device *dev, int width)
 {
@@ -154,6 +160,66 @@ void exynos4_setup_sdhci3_cfg_gpio(struct platform_device *dev, int width)
 	struct s3c_sdhci_platdata *pdata = dev->dev.platform_data;
 	unsigned int gpio;
 
+	#if defined(CONFIG_WIMAX_CMC) && defined(CONFIG_TARGET_LOCALE_NA)
+
+	if (gpio_get_value(GPIO_WIMAX_EN)) {
+		/* Set all the necessary GPK1[0:1] pins to special-function 2 */
+		for (gpio = EXYNOS4_GPK3(0); gpio < EXYNOS4_GPK3(2); gpio++) {
+			s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(2));
+			s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
+		}
+
+		/* Data pin GPK1[3:6] to special-function 2 */
+		for (gpio = EXYNOS4_GPK3(3); gpio <= EXYNOS4_GPK3(6); gpio++) {
+			s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(2));
+			s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
+		}
+		//__raw_writel(0x3FFF, GPK3DRV);
+		__raw_writel(0x2AAA, GPK3DRV);	// for sdio noise
+
+		for (gpio = EXYNOS4_GPK3(0); gpio < EXYNOS4_GPK3(2); gpio++) {
+
+			s3c_gpio_slp_cfgpin(gpio, S3C_GPIO_SLP_INPUT);
+			s3c_gpio_slp_setpull_updown(gpio, S3C_GPIO_PULL_NONE);
+
+		}
+
+		for (gpio = EXYNOS4_GPK3(3); gpio <= EXYNOS4_GPK3(6); gpio++) {
+
+			s3c_gpio_slp_cfgpin(gpio, S3C_GPIO_SLP_INPUT);
+			s3c_gpio_slp_setpull_updown(gpio, S3C_GPIO_PULL_NONE);
+
+		}
+
+	} else {
+		/* Set all the necessary GPK1[0:1] to Input pull down for power saving */
+		for (gpio = EXYNOS4_GPK3(0); gpio < EXYNOS4_GPK3(2); gpio++) {
+			s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(0));
+			s3c_gpio_setpull(gpio, S3C_GPIO_PULL_DOWN);
+		}
+
+		/* Data pin GPK1[3:6] to Input pull down for power saving */
+		for (gpio = EXYNOS4_GPK3(3); gpio <= EXYNOS4_GPK3(6); gpio++) {
+			s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(0));
+			s3c_gpio_setpull(gpio, S3C_GPIO_PULL_DOWN);
+		}
+
+		for (gpio = EXYNOS4_GPK3(0); gpio < EXYNOS4_GPK3(2); gpio++) {
+
+			s3c_gpio_slp_cfgpin(gpio, S3C_GPIO_SLP_INPUT);
+			s3c_gpio_slp_setpull_updown(gpio, S3C_GPIO_PULL_DOWN);
+
+		}
+
+		for (gpio = EXYNOS4_GPK3(3); gpio <= EXYNOS4_GPK3(6); gpio++) {
+
+			s3c_gpio_slp_cfgpin(gpio, S3C_GPIO_SLP_INPUT);
+			s3c_gpio_slp_setpull_updown(gpio, S3C_GPIO_PULL_DOWN);
+
+		}
+
+	}
+#else
 	/* Set all the necessary GPK3[0:1] pins to special-function 2 */
 	for (gpio = EXYNOS4_GPK3(0); gpio < EXYNOS4_GPK3(2); gpio++) {
 		s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(2));
@@ -199,6 +265,7 @@ void exynos4_setup_sdhci3_cfg_gpio(struct platform_device *dev, int width)
 		s3c_gpio_setpull(EXYNOS4_GPK3(2), S3C_GPIO_PULL_NONE);
 		s5p_gpio_set_drvstr(gpio, S5P_GPIO_DRVSTR_LV2);
 	}
+#endif // WIMAX_CMC
 }
 
 void exynos5_setup_sdhci0_cfg_gpio(struct platform_device *dev, int width)

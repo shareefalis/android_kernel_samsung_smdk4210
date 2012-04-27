@@ -195,8 +195,11 @@ ARRAY_SIZE(wlan_sdio_on_table), wlan_sdio_on_table);
 ARRAY_SIZE(wlan_sdio_off_table), wlan_sdio_off_table); }
 
 	udelay(200);
-
+#if defined(CONFIG_MACH_U1_NA_USCC_REV05)
+	sdhci_s3c_force_presence_change(&s3c_device_hsmmc2);
+#else
 	sdhci_s3c_force_presence_change(&s3c_device_hsmmc3);
+#endif
 	msleep(500); /* wait for carddetect */
 	return 0;
 }

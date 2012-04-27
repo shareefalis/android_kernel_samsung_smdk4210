@@ -105,7 +105,7 @@
 #include <linux/kmod.h>
 #include <linux/nsproxy.h>
 
-#undef TTY_DEBUG_HANGUP
+#define TTY_DEBUG_HANGUP
 
 #define TTY_PARANOIA_CHECK 1
 #define CHECK_TTY_COUNT 1

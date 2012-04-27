@@ -11,7 +11,11 @@ obj-$(CONFIG_SENSORS_CM3663)		+= cm3663.o
 obj-$(CONFIG_SENSORS_GP2A)		+= gp2a_proximity.o gp2a_light.o
 obj-$(CONFIG_SENSORS_GP2A_ANALOG)	+= gp2a_analog.o
 obj-$(CONFIG_SENSORS_K3G)		+= k3g.o
+ifeq ($(CONFIG_MACH_U1_NA_USCC_REV05),y)
+obj-$(CONFIG_SENSORS_K3DH)		+= k3dh_spr.o
+else
 obj-$(CONFIG_SENSORS_K3DH)		+= k3dh.o
+endif
 obj-$(CONFIG_SENSORS_LSM330DLC)		+= lsm330dlc_accel.o lsm330dlc_gyro.o
 obj-$(CONFIG_SENSORS_LPS331)		+= lps331ap.o
 obj-$(CONFIG_SENSORS_CM36651)		+= cm36651.o

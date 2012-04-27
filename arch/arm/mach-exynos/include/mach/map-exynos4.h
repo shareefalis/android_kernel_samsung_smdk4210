@@ -316,4 +316,21 @@
 
 #define S5P_SZ_UART			SZ_256
 
+#ifdef CONFIG_MACH_U1_NA_USCC_REV05
+#define EXYNOS4_PA_MODEMIF      (0x13A00000)
+#define S5P_PA_MODEMIF          EXYNOS4_PA_MODEMIF
+
+/* NAND */
+#define EXYNOS4_PA_NAND			(0x0CE00000)
+#define S5P_PA_NAND			EXYNOS4_PA_NAND
+
+#define EXYNOS4_SZ_NAND			SZ_256K
+#define S5P_SZ_NAND			EXYNOS4_SZ_NAND
+
+#define EXYNOS4_PA_MSHC                 (0x12550000)
+#define S5P_PA_MSHC                     EXYNOS4_PA_MSHC
+
+#define EXYNOS4_VA_GPIO2		S3C_ADDR(0x00930000)
+#endif
+
 #endif /* __ASM_ARCH_MAP_EXYNOS4_H */

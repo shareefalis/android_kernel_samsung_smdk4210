@@ -7,5 +7,7 @@ ifneq ($(CONFIG_WESTBRIDGE_DEBUG),y)
 endif
 
 obj-$(CONFIG_WESTBRIDGE)		+= device/
-obj-$(CONFIG_WESTBRIDGE)		+= block/
-obj-$(CONFIG_WESTBRIDGE)		+= gadget/
+# obj-$(CONFIG_WESTBRIDGE)		+= block/
+# obj-$(CONFIG_WESTBRIDGE)		+= gadget/
+obj-$(CONFIG_WESTBRIDGE)		+= switch/
+

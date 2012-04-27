@@ -85,7 +85,7 @@ touchkey register
 static int touchkey_keycode[5] = { 0,
 	KEY_MENU, KEY_ENTER, KEY_BACK, KEY_END };
 #elif defined(CONFIG_TARGET_LOCALE_NA)
-static int touchkey_keycode[5] = { NULL,
+static int touchkey_keycode[5] = { 0,
 	KEY_SEARCH, KEY_BACK, KEY_HOME, KEY_MENU };
 #else
 static int touchkey_keycode[3] = { 0, KEY_MENU, KEY_BACK };

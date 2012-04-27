@@ -21,6 +21,13 @@
 #include "u_serial.h"
 #include "gadget_chips.h"
 
+/* #define CSY_SAMSUNG_NO_IAD */
+#ifdef CONFIG_USB_DUN_SUPPORT
+/* refered from S1 */
+extern int modem_register(void * data);
+extern void modem_unregister(void);
+extern void notify_control_line_state(u32 value);
+#endif
 
 /*
  * This CDC ACM function support just wraps control functions and
