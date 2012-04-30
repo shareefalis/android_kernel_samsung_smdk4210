@@ -72,7 +72,7 @@ static const struct file_operations swmx_fops = {
 owner:THIS_MODULE,
 open	:	swmxdev_open,
 release	:	swmxdev_release,
-//unlcoked_ioctl	:	swmxdev_ioctl,
+unlocked_ioctl	:	swmxdev_ioctl,
 read	:	swmxdev_read,
 write	:	swmxdev_write,
 };
@@ -103,7 +103,7 @@ int swmxdev_release(struct inode *inode, struct file *file)
 	return 0;
 }
 
-int swmxdev_ioctl(struct file *file,
+static long swmxdev_ioctl(struct file *file,
 			 u_int cmd, u_long arg)
 {
 	int	ret = 0;
@@ -283,7 +283,7 @@ static const struct file_operations uwbr_fops = {
 owner:THIS_MODULE,
 open	:	uwbrdev_open,
 release	:	uwbrdev_release,
-//unlocked_ioctl	:	uwbrdev_ioctl,
+unlocked_ioctl	:	uwbrdev_ioctl,
 read	:	uwbrdev_read,
 write	:	uwbrdev_write,
 };
@@ -302,7 +302,7 @@ struct control_tx_buffer {
 
 static struct control_tx_buffer g_tx_buffer;
 
-int uwbrdev_ioctl(struct file *file, u_int cmd, u_long arg)
+static long uwbrdev_ioctl(struct file *file, u_int cmd, u_long arg)
 {
 	struct net_adapter		*adapter;
 	struct process_descriptor	*process;
@@ -932,14 +932,15 @@ void adapter_remove(struct sdio_func *func)
 
 
 
-static void eeprom_show(struct device *dev,
+static ssize_t eeprom_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	dump_debug("Write EEPROM!!");
 
 	eeprom_write_boot();
 	eeprom_write_rev();
-
+	
+	return 0;
 
 }
 
@@ -1140,7 +1141,7 @@ static ssize_t sleepmode_store(struct device *dev,
 
 }
 
-//static DEVICE_ATTR(eeprom, 0664, eeprom_show, eeprom_store);
+static DEVICE_ATTR(eeprom, 0664, eeprom_show, eeprom_store);
 static DEVICE_ATTR(onoff, 0664, onoff_show, onoff_store);
 static DEVICE_ATTR(wmxuart, 0664, wmxuart_show, wmxuart_store);
 static DEVICE_ATTR(dump, 0664, dump_show, dump_store);
@@ -1233,11 +1234,11 @@ static int wimax_probe(struct platform_device *pdev)
 		dump_debug("%s: class create"
 			" failed\n", __func__);
 	}
-/*	err = device_create_file(dev_t, &dev_attr_eeprom);
+	err = device_create_file(dev_t, &dev_attr_eeprom);
 	if (err < 0) {
 		dump_debug("%s: Failed to create device file(%s)\n",
 				__func__, dev_attr_eeprom.attr.name);
-	}*/
+	}
 
 	err = device_create_file(dev_t, &dev_attr_onoff);
 	if (err < 0) {

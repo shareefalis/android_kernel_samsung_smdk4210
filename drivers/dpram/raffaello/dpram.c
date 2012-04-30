@@ -25,6 +25,7 @@
 #include <mach/regs-gpio.h>
 #include <plat/gpio-cfg.h>
 #include <mach/hardware.h>
+#include <linux/sched.h>
 
 #ifdef CONFIG_PROC_FS
 #include <linux/proc_fs.h>
@@ -34,9 +35,9 @@
 #include <linux/wakelock.h>
 #include <linux/miscdevice.h>
 #include <linux/netdevice.h>
-#ifdef CONFIG_KERNEL_DEBUG_SEC
+//#ifdef CONFIG_KERNEL_DEBUG_SEC
 #include <linux/kernel_sec_common.h>
-#endif
+//#endif
 //#include <mach/ds_manager.h>
 
 #include "dpram.h"
@@ -66,7 +67,7 @@ int cp_dump_irq; //for LPA
 #endif
 #define IRQ_DPRAM_AP_INT_N  IRQ_MODEM_IF     // IDPRAM's special interrupt in AP
 
-#define DEBUG_DPRAM_INT_HANDLER
+//#define DEBUG_DPRAM_INT_HANDLER
 #define PRINT_DPRAM_PWR_CTRL
 //#define PRINT_DPRAM_WRITE
 //#define PRINT_DPRAM_READ
@@ -304,7 +305,7 @@ static struct fasync_struct *dpram_err_async_q;
 static struct fasync_struct *dpram_dump_async_q;
 
 extern void usb_switch_mode(int);
-//extern int sec_debug_level();
+extern int sec_debug_level(void);
 #endif    /* _ENABLE_ERROR_DEVICE */
 
 
@@ -734,15 +735,17 @@ static void dpram_unlock_read(const char* func)
 
 
 #if defined(PRINT_DPRAM_WRITE) || defined(PRINT_DPRAM_READ)
-static void dpram_print_packet(char *buf, int len)
+static void dpram_print_packet(const unsigned char *buf, int len)
 {
+    int i;
     LOGA("len = %d\n", len);
+
 
     print_buff[0] = '\0';
 
     for (i = 0; i < len; i++)
     {
-        sprintf((print_buff + (i%16)*3), "%02x \0", *((char *)buf + i));
+        sprintf((print_buff + (i%16)*3), "%02x ", *((char *)buf + i));
         if ( (i%16) == 15 )
         {
             LOGA("%s\n", print_buff);
@@ -885,7 +888,7 @@ static inline int dpram_tty_insert_data(dpram_device_t *device, const u8 *psrc, 
     int retval = 0;
 
 #ifdef PRINT_DPRAM_READ
-    dpram_print_packet(psrc, size);
+  //  dpram_print_packet(psrc, size);
 #endif
 
     if ( size > CLUSTER_SEGMENT && (device->serial.tty->index == 1) )
@@ -1685,8 +1688,8 @@ static int dpram_read_proc(char *page, char **start, off_t off,
 /* dpram tty file operations. */
 static int dpram_tty_open(struct tty_struct *tty, struct file *file)
 {
-    dpram_device_t *device = &dpram_table[tty->index];
-
+	dpram_device_t *device = &dpram_table[tty->index];
+    
     device->serial.tty = tty;
     device->serial.open_count++;
 
@@ -1703,8 +1706,9 @@ static int dpram_tty_open(struct tty_struct *tty, struct file *file)
 
 static void dpram_tty_close(struct tty_struct *tty, struct file *file)
 {
+  
     dpram_device_t *device = (dpram_device_t *)tty->driver_data;
-
+    
     if ( device && (device == &dpram_table[tty->index]) )
     {
         down(&device->serial.sem);
@@ -1717,7 +1721,7 @@ static void dpram_tty_close(struct tty_struct *tty, struct file *file)
 static int dpram_tty_write(struct tty_struct *tty, const unsigned char *buffer, int count)
 {
     dpram_device_t *device = (dpram_device_t *)tty->driver_data;
-
+    
     if (!device)
         return 0;
 
@@ -1728,9 +1732,9 @@ static int dpram_tty_write_room(struct tty_struct *tty)
 {
     int avail;
     u16 head, tail;
-
+    
     dpram_device_t *device = (dpram_device_t *)tty->driver_data;
-
+    
     if (device != NULL)
     {
         head = device->out_head_saved;
@@ -1744,10 +1748,10 @@ static int dpram_tty_write_room(struct tty_struct *tty)
     return 0;
 }
 
-static long dpram_tty_ioctl(struct tty_struct *tty, unsigned int cmd, unsigned long arg)
+static int dpram_tty_ioctl(struct tty_struct *tty, unsigned int cmd, unsigned long arg)
 {
     unsigned int val;
-
+     
     switch (cmd)
     {
         case DPRAM_PHONE_ON:
@@ -1897,10 +1901,10 @@ static long dpram_tty_ioctl(struct tty_struct *tty, unsigned int cmd, unsigned l
 		dpram_clear_response();
 
             // goto Upload mode
-            /*if (kernel_sec_get_debug_level() != KERNEL_SEC_DEBUG_LEVEL_LOW) {
+           // if (kernel_sec_get_debug_level() != KERNEL_SEC_DEBUG_LEVEL_LOW) {
                 LOGE("Upload Mode!!!\n");
                 kernel_sec_dump_cp_handle2();
-            }*/
+           // }
 
             return 0;
         }
@@ -1919,7 +1923,7 @@ static int dpram_tty_chars_in_buffer(struct tty_struct *tty)
     u16 head, tail;
 
     dpram_device_t *device = (dpram_device_t *)tty->driver_data;
-
+    
     if (device != NULL)
     {
         head = device->out_head_saved;
@@ -2055,7 +2059,7 @@ static long dpram_dump_ioctl(struct file *file,
 
             // Go to Upload mode
            // if (kernel_sec_get_debug_level() != KERNEL_SEC_DEBUG_LEVEL_LOW)
-            //    kernel_sec_dump_cp_handle2();
+               kernel_sec_dump_cp_handle2();
 
             return 0;
         }
@@ -2065,7 +2069,7 @@ static long dpram_dump_ioctl(struct file *file,
             break;
     }
 
-    return 0;
+    return -ENOIOCTLCMD;
 }
 
 #endif    /* _ENABLE_ERROR_DEVICE */
@@ -2572,7 +2576,7 @@ static struct tty_operations dpram_tty_ops = {
     .close           = dpram_tty_close,
     .write           = dpram_tty_write,
     .write_room      = dpram_tty_write_room,
-    .compat_ioctl    = dpram_tty_ioctl,
+    .ioctl    = dpram_tty_ioctl,
     .chars_in_buffer = dpram_tty_chars_in_buffer,
 	
     /* TODO: add more operations */
@@ -2674,7 +2678,7 @@ static int register_dpram_driver(void)
     dpram_tty_driver->name = "dpram";
     dpram_tty_driver->major = DRIVER_MAJOR_NUM;
     dpram_tty_driver->minor_start = 1;
-    dpram_tty_driver->num = MAX_INDEX;
+    dpram_tty_driver->num = 2;
     dpram_tty_driver->type = TTY_DRIVER_TYPE_SERIAL;
     dpram_tty_driver->subtype = SERIAL_TYPE_NORMAL;
     dpram_tty_driver->flags = TTY_DRIVER_REAL_RAW;
@@ -3094,6 +3098,7 @@ static int dpram_init_hw(void)
 
 
     //1) Initialize the interrupt pins
+/*	s5p_register_gpio_interrupt(GPIO_QSC_INT);
 	s5p_register_gpio_interrupt(IRQ_QSC_INT);
 	s5p_register_gpio_interrupt(GPIO_C210_DPRAM_INT_N);
 	s5p_register_gpio_interrupt(GPIO_QSC_PHONE_ACTIVE);
@@ -3101,7 +3106,7 @@ static int dpram_init_hw(void)
 	s5p_register_gpio_interrupt(GPIO_CP_DUMP_INT);
 	s5p_register_gpio_interrupt(GPIO_PDA_ACTIVE);
 	s5p_register_gpio_interrupt(GPIO_QSC_PHONE_ON);
-	s5p_register_gpio_interrupt(GPIO_CP_REQ_RESET);
+	s5p_register_gpio_interrupt(GPIO_CP_REQ_RESET);*/
 	
     irq_set_irq_type(IRQ_DPRAM_AP_INT_N, IRQ_TYPE_LEVEL_LOW);
 
@@ -3118,7 +3123,7 @@ static int dpram_init_hw(void)
     irq_set_irq_type(dpram_wakeup_irq, IRQ_TYPE_EDGE_RISING);
 
     rv = gpio_request(IRQ_QSC_PHONE_ACTIVE, "gpx1_6");
-	s5p_register_gpio_interrupt(rv);
+//	s5p_register_gpio_interrupt(rv);
     if(rv < 0) {
         printk("IDPRAM: [%s] failed to get gpio GPX1_6\n",__func__);
 	goto err1;

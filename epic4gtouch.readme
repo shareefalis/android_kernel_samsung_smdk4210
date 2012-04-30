@@ -1,6 +1,8 @@
 Initial support for Epic4gTouch
 -requires libMali, and the EGL files from the Intl SGS2 to boot
 
+UPDATED: 4/30/12
+
 What Works:
 Sound
 Internal Storage
@@ -9,9 +11,9 @@ WIFI
 BT
 USB
 Touchkeys
+IDPRAM (modem) updated: 4/30/12 -sb
 
 What Doesn't Work:
-IDPRAM - driver ported from 2.6 but fails to start
 WiMAX - driver ported from 2.6 but fails to start
 Camera
 Sensors are screwy

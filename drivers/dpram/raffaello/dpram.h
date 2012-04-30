@@ -257,7 +257,7 @@ typedef struct {
 */
 #define DRIVER_NAME                 "DPRAM"
 #define DRIVER_PROC_ENTRY           "driver/dpram"
-#define DRIVER_MAJOR_NUM            252
+#define DRIVER_MAJOR_NUM            255
 #define DPRAM_DUMP_DEV_MAJOR        250
 
 /*
@@ -268,7 +268,7 @@ typedef struct {
 /* Device types */
 #define DEV_TYPE_NET                0           /* network device for IP data */
 #define DEV_TYPE_SERIAL             1           /* serial device for CSD */
-#define CSD_MAJOR_NUM               251         /* Device major number */
+#define CSD_MAJOR_NUM               240         /* Device major number */
 #define CSD_MINOR_NUM               0           /* Device minor number */
 #define MAX_PDP_CONTEXT             10          /* Maximum number of PDP context */
 #define MAX_PDP_DATA_LEN            1500        /* Maximum PDP data length */

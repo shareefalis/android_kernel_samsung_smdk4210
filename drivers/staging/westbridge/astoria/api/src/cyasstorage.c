@@ -465,8 +465,6 @@ cy_as_storage_start(cy_as_device_handle handle,
 	cy_as_return_status_t ret = CY_AS_ERROR_SUCCESS ;
 	cy_as_device *dev_p = (cy_as_device *)handle ;
 	
-cy_as_hal_print_message(KERN_ERR"%s: Starting Storage - sbrissen\n", __func__) ;
-
 	if (!dev_p || (dev_p->sig != CY_AS_DEVICE_HANDLE_SIGNATURE))
 		return CY_AS_ERROR_INVALID_HANDLE ;
 
@@ -485,13 +483,11 @@ cy_as_hal_print_message(KERN_ERR"%s: Starting Storage - sbrissen\n", __func__) ;
 	cy_as_device_set_s_s_s_pending(dev_p) ;
 
 	if (dev_p->storage_count == 0) {
-	cy_as_hal_print_message(KERN_ERR"%s: Starting Storage - dev_p->storage_count - sbrissen\n", __func__) ;
 		/* Create the request to send to the West Bridge device */
 		req_p = cy_as_ll_create_request(dev_p,
 			CY_RQT_START_STORAGE, CY_RQT_STORAGE_RQT_CONTEXT, 1) ;
 		if (req_p == 0) {
 			cy_as_device_clear_s_s_s_pending(dev_p) ;
-			cy_as_hal_print_message(KERN_ERR"%s: Starting Storage - cy_as_ll_create_request - sbrissen\n", __func__) ;
 			return CY_AS_ERROR_OUT_OF_MEMORY ;
 		}
 
@@ -501,16 +497,13 @@ cy_as_hal_print_message(KERN_ERR"%s: Starting Storage - sbrissen\n", __func__) ;
 		if (reply_p == 0) {
 			cy_as_device_clear_s_s_s_pending(dev_p) ;
 			cy_as_ll_destroy_request(dev_p, req_p) ;
-			cy_as_hal_print_message(KERN_ERR"%s: Starting Storage - cy_as_ll_create_response - sbrissen\n", __func__) ;
 			return CY_AS_ERROR_OUT_OF_MEMORY ;
 		}
 
 		if (cb == 0) {
 			ret = cy_as_ll_send_request_wait_reply(dev_p,
 				req_p, reply_p) ;
-			cy_as_hal_print_message(KERN_ERR"%s: Starting Storage - cy_as_ll_send_request_wait_reply - sbrissen\n", __func__) ;
 			if (ret != CY_AS_ERROR_SUCCESS) {
-				cy_as_hal_print_message(KERN_ERR"%s: Starting Storage - cy_as_ll_send_request_wait_reply - sbrissen - ERROR\n", __func__) ;
 				goto destroy ;
 			}
 
@@ -521,7 +514,6 @@ cy_as_hal_print_message(KERN_ERR"%s: Starting Storage - sbrissen\n", __func__) ;
 				CY_FUNCT_CB_STOR_START, 0, dev_p->func_cbs_stor,
 				CY_AS_REQUEST_RESPONSE_EX, req_p, reply_p,
 				cy_as_storage_func_callback) ;
-			cy_as_hal_print_message(KERN_ERR"%s: Starting Storage - cy_as_misc_send_request - sbrissen\n", __func__) ;
 			if (ret != CY_AS_ERROR_SUCCESS)
 				goto destroy ;
 

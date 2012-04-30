@@ -98,7 +98,7 @@ struct net_adapter {
 /* swmxctl functions */
 int swmxdev_open(struct inode *inode, struct file *file);
 int swmxdev_release(struct inode *inode, struct file *file);
-int swmxdev_ioctl(struct file *file,
+static long swmxdev_ioctl(struct file *file,
 			 u_int cmd, u_long arg);
 ssize_t swmxdev_read(struct file *file, char *buf,
 			 size_t count, loff_t *ppos);
@@ -108,7 +108,7 @@ ssize_t swmxdev_write(struct file *file, const char *buf,
 /* uwibro functions */
 int uwbrdev_open(struct inode *inode, struct file *file);
 int uwbrdev_release(struct inode *inode, struct file *file);
-int uwbrdev_ioctl(struct file *file,
+static long uwbrdev_ioctl(struct file *file,
 			 u_int cmd, u_long arg);
 ssize_t uwbrdev_read(struct file *file, char *buf,
 			 size_t count, loff_t *ppos);
