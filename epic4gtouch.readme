@@ -16,7 +16,11 @@ IDPRAM (modem) updated: 4/30/12 -sb
 What Doesn't Work:
 WiMAX - driver ported from 2.6 but fails to start
 Camera
+
+Needs fixing:
 Sensors are screwy
+Audio - speaker/call volumes are low
+
 
 Notes:
 - Phone will sometimes reboot when its unplugged, haven't pulled any logs to see whats causing it yet but I'm guessing its a power/battery issue
