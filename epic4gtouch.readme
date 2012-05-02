@@ -19,5 +19,5 @@ Camera
 Sensors are screwy
 
 Notes:
-- Phone reboots when its unplugged, haven't pulled any logs to see whats causing it yet but I'm guessing its a power/battery issue
+- Phone will sometimes reboot when its unplugged, haven't pulled any logs to see whats causing it yet but I'm guessing its a power/battery issue
 -This will need lots of cleanup once everything works
