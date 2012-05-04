@@ -55,16 +55,16 @@ obj-$(CONFIG_MACH_SMDKC210)		+= mach-smdkv310.o
 obj-$(CONFIG_MACH_SMDKV310)		+= mach-smdkv310.o
 obj-$(CONFIG_MACH_ARMLEX4210)		+= mach-armlex4210.o
 obj-$(CONFIG_MACH_UNIVERSAL_C210)	+= mach-universal_c210.o
-ifeq ($(CONFIG_MACH_U1_NA_USCC_REV05),y)
+ifeq ($(CONFIG_TARGET_LOCALE_NA),y)
 obj-$(CONFIG_MACH_U1)			+= mach-u1.o sec-common.o dev-c1-phone.o sec-switch_max8997.o
 obj-$(CONFIG_MACH_U1_BD)		+= c1-gpio.o
+obj-y	+= setup-i2c4.o
 else
 obj-$(CONFIG_MACH_U1)			+= mach-u1.o sec-common.o u1-gps.o sec-switch_max8997.o
 obj-$(CONFIG_MACH_U1_BD)		+= u1-gpio.o
 endif
 obj-$(CONFIG_MACH_Q1_BD)		+= q1-gpio.o
 obj-$(CONFIG_MACH_U1)			+= u1-wlan.o
-obj-$(CONFIG_WIMAX_CMC)			+= c1-wimax.o
 obj-$(CONFIG_MACH_PX)			+= mach-px.o sec-common.o px-gps.o px-switch.o
 obj-$(CONFIG_MACH_P2)			+= p2-gpio.o
 obj-$(CONFIG_MACH_P4)			+= p4-gpio.o
@@ -107,6 +107,7 @@ obj-$(CONFIG_MACH_P10)			+= mach-p10.o p10-gpio.o sec-common.o
 
 # device support
 
+obj-$(CONFIG_WIMAX_CMC)	+= c1-wimax.o
 obj-$(CONFIG_ARCH_EXYNOS)		+= dev-audio.o
 obj-$(CONFIG_EXYNOS5_DEV_AHCI)		+= dev-dwc-ahsata.o
 obj-$(CONFIG_EXYNOS4_DEV_AHCI)		+= dev-ahci.o

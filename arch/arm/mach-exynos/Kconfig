@@ -727,6 +727,11 @@ choice
 	prompt "U1 board"
 	depends on MACH_U1
 	default MACH_U1_BD
+	
+config MACH_U1_NA_USCC_REV05
+	select S3C_DEV_I2C4
+	select EXYNOS4_SETUP_I2C4
+	select USBHUB_USB3803
 
 config MACH_U1_BD
 	bool "U1 Board"

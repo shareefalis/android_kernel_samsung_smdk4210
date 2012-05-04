@@ -16,7 +16,7 @@
 #include <linux/delay.h>
 #include "max8893.h"
 
-
+//#define WIMAX_DEBUG
 
 static struct i2c_client *max8893_client;
 
@@ -25,6 +25,7 @@ static struct i2c_client *max8893_client;
 static int max8893_set_ldo(int ldo, int enable)
 {
 	int temp;
+	printk("[WIMAX_BEBUG] max8893_set_ldo");
 	temp = i2c_smbus_read_byte_data(max8893_client, MAX8893_REG_ONOFF);
 	if(temp<0)
 		return temp;
@@ -58,12 +59,16 @@ static int max8893_get_voltage(int ldo)
 static int max8893_set_voltage(int ldo, int mv)
 {
 	int temp;
+	printk("[WIMAX_BEBUG] max8893_set_voltage");
 	if(mv>MAX_VOLTAGE(ldo))
 		return -22;
+
 	temp = MIN_VOLTAGE(ldo);
 	if(mv<temp)
 		return -22;
+	printk(KERN_ERR "[WiMAX] max8893_set_voltage Temp=%i", temp);
 	temp = (mv - temp)/100;
+	printk(KERN_ERR "[WiMAX] max8893_set_voltage i2c_smbus_write_byte_data, ldo=%i  mv=%i", ldo, mv);
 	return i2c_smbus_write_byte_data(max8893_client, MAX8893_REG_LDO(ldo), (unsigned char)temp);
 }
 
@@ -73,8 +78,8 @@ int wimax_pmic_set_voltage(void)
 #ifdef WIMAX_DEBUG
         int i;
 #endif
-
-	mdelay(10);
+		printk("[WIMAX_BEBUG] wimax_pmic_set_voltage");
+		//mdelay(10);
         ret = (
         max8893_set_voltage(BUCK, 1200)|
         max8893_set_voltage(LDO1, 2800)|
@@ -110,6 +115,7 @@ static int max8893_wmx_probe(struct i2c_client *client, const struct i2c_device_
 #endif	
 	max8893_client = client;
 #if 0
+		printk("[WIMAX_BEBUG] max8893_wmx_probe");
 	ret = (
 	max8893_set_voltage(BUCK, 1200)|
 	max8893_set_voltage(LDO1, 2800)|
@@ -144,6 +150,7 @@ static int max8893_wmx_probe(struct i2c_client *client, const struct i2c_device_
 
 static int max8893_wmx_remove(struct i2c_client *client)
 {
+		printk("[WIMAX_BEBUG] max8893_wmx_remove");
 	max8893_set_ldo(BUCK, OFF);
 	max8893_set_ldo(LDO1, OFF);
 	max8893_set_ldo(LDO2, OFF);

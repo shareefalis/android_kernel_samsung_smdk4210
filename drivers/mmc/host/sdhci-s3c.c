@@ -301,6 +301,7 @@ static int sdhci_s3c_platform_8bit_width(struct sdhci_host *host, int width)
 
 	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
 
+
 	switch (width) {
 	case MMC_BUS_WIDTH_8:
 		ctrl |= SDHCI_CTRL_8BITBUS;
@@ -804,7 +805,7 @@ static int sdhci_s3c_suspend(struct platform_device *dev, pm_message_t pm)
 static int sdhci_s3c_resume(struct platform_device *dev)
 {
 	struct sdhci_host *host = platform_get_drvdata(dev);
-#if defined(CONFIG_WIMAX_CMC) && defined(CONFIG_TARGET_LOCALE_NA)
+#if defined(CONFIG_WIMAX_CMC)
       	struct s3c_sdhci_platdata *pdata = dev->dev.platform_data;
 	u32 ier;
 	if (pdata->enable_intr_on_resume) {

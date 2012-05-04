@@ -415,7 +415,7 @@ static struct gpio_init_data u1_init_gpios[] = {
 		.drv	= S5P_GPIO_DRVSTR_LV1,
 	},
 #endif
-#if !defined(CONFIG_TARGET_LOCALE_NA) && !defined(CONFIG_MACH_C1_NA_SPR_EPIC2_REV00)
+#if !defined(CONFIG_TARGET_LOCALE_NA)
 	{	/*GPY0 */
 		.num	= EXYNOS4_GPY0(2),
 		.cfg	= S3C_GPIO_INPUT,
@@ -424,7 +424,7 @@ static struct gpio_init_data u1_init_gpios[] = {
 		.drv	= S5P_GPIO_DRVSTR_LV1,
 	},
 #endif
-#if defined(CONFIG_TARGET_LOCALE_NA) || defined(CONFIG_MACH_C1_NA_SPR_EPIC2_REV00)
+#if defined(CONFIG_TARGET_LOCALE_NA)
 	{	/*GPY0 */
 		.num	= EXYNOS4_GPY0(2),
 		.cfg	= S3C_GPIO_SFN(3),
@@ -440,7 +440,7 @@ static struct gpio_init_data u1_init_gpios[] = {
 		.pud	= S3C_GPIO_PULL_DOWN,
 		.drv	= S5P_GPIO_DRVSTR_LV1,
 	},
-#if !defined(CONFIG_TARGET_LOCALE_NA) && !defined(CONFIG_MACH_C1_NA_SPR_EPIC2_REV00)
+#if !defined(CONFIG_TARGET_LOCALE_NA)
 	{
 		.num	= EXYNOS4_GPY0(4),
 		.cfg	= S3C_GPIO_INPUT,
@@ -491,7 +491,7 @@ static struct gpio_init_data u1_init_gpios[] = {
 		.pud	= S3C_GPIO_PULL_DOWN,
 		.drv	= S5P_GPIO_DRVSTR_LV1,
 	},
-#if !defined(CONFIG_TARGET_LOCALE_NA) && !defined(CONFIG_MACH_C1_NA_SPR_EPIC2_REV00)
+#if !defined(CONFIG_TARGET_LOCALE_NA)
 	{
 		.num	= EXYNOS4_GPY1(3),
 		.cfg	= S3C_GPIO_INPUT,
@@ -518,7 +518,7 @@ static struct gpio_init_data u1_init_gpios[] = {
 		.drv	= S5P_GPIO_DRVSTR_LV1,
 	},
 #endif
-#if defined(CONFIG_TARGET_LOCALE_NA) || defined(CONFIG_MACH_C1_NA_SPR_EPIC2_REV00)
+#if defined(CONFIG_TARGET_LOCALE_NA)
 	{
 		.num	= EXYNOS4_GPY1(3),
 		.cfg	= S3C_GPIO_OUTPUT,
@@ -570,7 +570,7 @@ static struct gpio_init_data u1_init_gpios[] = {
 		.pud	= S3C_GPIO_PULL_DOWN,
 		.drv	= S5P_GPIO_DRVSTR_LV1,
 	},
-#if !defined(CONFIG_TARGET_LOCALE_NA) && !defined(CONFIG_MACH_C1_NA_SPR_EPIC2_REV00)
+#if !defined(CONFIG_TARGET_LOCALE_NA)
 	{	/*GPY5 */
 		.num	= EXYNOS4_GPY5(0),
 		.cfg	= S3C_GPIO_INPUT,
@@ -1285,7 +1285,7 @@ static unsigned int u1_sleep_gpio_table[][3] = {
 	{ EXYNOS4_GPZ(4),  S3C_GPIO_SLP_OUT0,  S3C_GPIO_PULL_NONE},
 	{ EXYNOS4_GPZ(5),  S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_DOWN},	/* NC */
 	{ EXYNOS4_GPZ(6),  S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_DOWN},	/* NC */
-#if defined(CONFIG_TARGET_LOCALE_NA)
+//#if defined(CONFIG_TARGET_LOCALE_NA)
 	/*Wimax sleep gpio config start*//* WIMAX_USB_EN */
 	{ EXYNOS4_GPB(4),       S3C_GPIO_SLP_OUT0,  S3C_GPIO_PULL_NONE}, 
 	{ GPIO_WIMAX_DBGEN_28V, S3C_GPIO_SLP_PREV,  S3C_GPIO_PULL_NONE},
@@ -1302,7 +1302,7 @@ static unsigned int u1_sleep_gpio_table[][3] = {
 	{ GPIO_CMC_SCL_18V,	S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_NONE},
 	{ GPIO_CMC_SDA_18V,	S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_NONE},
 	/*Wimax sleep gpio config end*/
-#endif /* CONFIG_TARGET_LOCALE_NA */
+//#endif /* CONFIG_TARGET_LOCALE_NA */
 
 #if defined(CONFIG_TARGET_LOCALE_NA) || defined(CONFIG_MACH_C1_NA_SPR_EPIC2_REV00)
 	{ EXYNOS4_GPY2(5),  S3C_GPIO_SLP_OUT0,	S3C_GPIO_PULL_NONE}, /* SIDE_CLK_EN */

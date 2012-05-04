@@ -193,6 +193,7 @@
 static struct wacom_g5_callbacks *wacom_callbacks;
 #endif /* CONFIG_EPEN_WACOM_G5SP */
 
+#include <linux/regulator/max8893.h>
 #include <linux/wimax/samsung/wimax732.h>
 
 #if defined(CONFIG_TDMB) || defined(CONFIG_TDMB_MODULE)
@@ -362,6 +363,9 @@ static int m5mo_power_on(void)
 
 	/* VT_CORE_1.5V */
 	ret = gpio_direction_output(GPIO_VT_CAM_15V, 1);
+#ifdef CONFIG_TARGET_LOCALE_NA
+	s3c_gpio_setpull(GPIO_VT_CAM_15V, S3C_GPIO_PULL_NONE);
+#endif /* CONFIG_TARGET_LOCALE_NA */
 	CAM_CHECK_ERR_RET(ret, "output VT_CAM_1.5V");
 	udelay(20);
 
@@ -1269,9 +1273,9 @@ static int ext_cd_cleanup_hsmmc##num(void (*notify_func)( \
 #ifdef CONFIG_S3C_DEV_HSMMC3
 	DEFINE_MMC_CARD_NOTIFIER(3)
 #endif
-#ifdef CONFIG_S3C_DEV_HSMMC2
+//#ifdef CONFIG_S3C_DEV_HSMMC2
 	DEFINE_MMC_CARD_NOTIFIER(2)
-#endif
+//#endif
 
 /*
  * call this when you need sd stack to recognize insertion or removal of card
@@ -1295,7 +1299,7 @@ void sdhci_s3c_force_presence_change(struct platform_device *pdev)
 	if (pdev == &s3c_device_hsmmc2) {
 		printk("---------test logs pdev : %p s3c_device_hsmmc2 %p \n",
 			pdev, &s3c_device_hsmmc2);
-		notify_func = hsmmc3_notify_func;
+		notify_func = hsmmc2_notify_func;
 		printk("---------test logs notify_func : %p \n", notify_func);
 	}
 #endif
@@ -1321,15 +1325,20 @@ static struct s3c_sdhci_platdata exynos4_hsmmc0_pdata __initdata = {
 
 #ifdef CONFIG_S3C_DEV_HSMMC2
 static struct s3c_sdhci_platdata exynos4_hsmmc2_pdata __initdata = {
+#if defined (CONFIG_TARGET_LOCALE_NA)
+	.cd_type = S3C_SDHCI_CD_EXTERNAL,
+	.clk_type = S3C_SDHCI_CLK_DIV_EXTERNAL,
+	.pm_flags = S3C_SDHCI_PM_IGNORE_SUSPEND_RESUME,
+	.ext_cd_init = ext_cd_init_hsmmc2,
+	.ext_cd_cleanup = ext_cd_cleanup_hsmmc2,
+#else
 	.cd_type = S3C_SDHCI_CD_GPIO,
-#if !defined (CONFIG_MACH_U1_NA_USCC_REV05)
 	.ext_cd_gpio = EXYNOS4_GPX3(4),
-#endif
 	.ext_cd_gpio_invert = 1,
-#if !defined (CONFIG_MACH_U1_NA_USCC_REV05)
 	.clk_type = S3C_SDHCI_CLK_DIV_EXTERNAL,
 	.vmmc_name = "vtf_2.8v",
 #endif
+
 };
 #endif
 
@@ -2910,7 +2919,11 @@ static struct max8997_muic_data max8997_muic = {
 	.charger_cb = max8997_muic_charger_cb,
 	.mhl_cb = max8997_muic_mhl_cb,
 	.is_mhl_attached = max8997_muic_is_mhl_attached,
+#ifdef CONFIG_TARGET_LOCALE_NA
+	.set_safeout = NULL,
+#else
 	.set_safeout = max8997_muic_set_safeout,
+#endif
 	.init_cb = max8997_muic_init_cb,
 	.deskdock_cb = max8997_muic_deskdock_cb,
 	.cardock_cb = max8997_muic_cardock_cb,
@@ -3591,6 +3604,36 @@ static struct platform_device sec_device_battery = {
 	.dev.platform_data = &sec_bat_pdata,
 };
 #endif /* CONFIG_BATTERY_SEC_U1 */
+
+#ifdef CONFIG_LEDS_GPIO
+struct gpio_led leds_gpio[] = {
+	{
+		.name = "red",
+		.default_trigger = NULL,        /* "default-on", // Turn ON RED LED at boot time ! */
+		.gpio = GPIO_SVC_LED_RED,
+		.active_low = 0,
+	},
+	{
+		.name = "blue",
+		.default_trigger = NULL,	/* "default-on", // Turn ON RED LED at boot time ! */
+		.gpio = GPIO_SVC_LED_BLUE,
+		.active_low = 0,
+	}
+};
+
+
+struct gpio_led_platform_data leds_gpio_platform_data = {
+	.num_leds = ARRAY_SIZE(leds_gpio),
+	.leds = leds_gpio,
+};
+
+
+struct platform_device sec_device_leds_gpio = {
+	.name   = "leds-gpio",
+	.id     = -1,
+	.dev = { .platform_data = &leds_gpio_platform_data },
+};
+#endif /* CONFIG_LEDS_GPIO */
 
 #ifdef CONFIG_SMB136_CHARGER_Q1
 static void smb136_set_charger_name(void)
@@ -4694,17 +4737,137 @@ static struct i2c_board_info i2c_devs3[] __initdata = {
 
 };
 #endif
-#ifdef CONFIG_S3C_DEV_I2C4
+//#ifdef CONFIG_S3C_DEV_I2C4 || 
+#ifdef CONFIG_TARGET_LOCALE_NA
 /* I2C4 */
-static struct i2c_board_info i2c_devs4[] __initdata = {
-#if defined(CONFIG_WIMAX_CMC) && defined(CONFIG_TARGET_LOCALE_NA)
+static struct regulator_init_data u1_max8893_buck_data = {
+	.constraints	= {
+		.name		= "max8893_buck",
+		.min_uV		= 1200000,
+		.max_uV		= 1200000,
+		.apply_uV	= 1,
+		.valid_ops_mask	= REGULATOR_CHANGE_VOLTAGE |
+				  REGULATOR_CHANGE_STATUS,
+	},
+};
+
+static struct regulator_init_data u1_max8893_ldo1_data = {
+	.constraints	= {
+		.name		= "max8893_ldo1",
+		.min_uV		= 2800000,
+		.max_uV		= 2800000,
+		.apply_uV	= 1,
+		.valid_ops_mask	= REGULATOR_CHANGE_VOLTAGE |
+				  REGULATOR_CHANGE_STATUS,
+	},
+};
+
+static struct regulator_init_data u1_max8893_ldo2_data = {
+	.constraints	= {
+		.name		= "max8893_ldo2",
+		.min_uV		= 2800000,
+		.max_uV		= 2800000,
+		.apply_uV	= 1,
+		.valid_ops_mask	= REGULATOR_CHANGE_VOLTAGE |
+				  REGULATOR_CHANGE_STATUS,
+	},
+};
+
+static struct regulator_init_data u1_max8893_ldo3_data = {
+	.constraints	= {
+		.name		= "max8893_ldo3",
+		.min_uV		= 3300000,
+		.max_uV		= 3300000,
+		.apply_uV	= 1,
+		.valid_ops_mask	= REGULATOR_CHANGE_VOLTAGE |
+				  REGULATOR_CHANGE_STATUS,
+	},
+};
+
+static struct regulator_init_data u1_max8893_ldo4_data = {
+	.constraints	= {
+		.name		= "max8893_ldo4",
+		.min_uV		= 2900000,
+		.max_uV		= 2900000,
+		.apply_uV	= 1,
+		.valid_ops_mask	= REGULATOR_CHANGE_VOLTAGE |
+				  REGULATOR_CHANGE_STATUS,
+	},
+};
+
+static struct regulator_init_data u1_max8893_ldo5_data = {
+	.constraints	= {
+		.name		= "max8893_ldo5",
+		.min_uV		= 2800000,
+		.max_uV		= 2800000,
+		.apply_uV	= 1,
+		.valid_ops_mask	= REGULATOR_CHANGE_VOLTAGE |
+				  REGULATOR_CHANGE_STATUS,
+	},
+};
+
+static struct max8893_subdev_data u1_max8893_subdev_data[] = {
 	{
-		I2C_BOARD_INFO("max8893_wmx", 0x3E),
-		.platform_data = NULL,
+		.id = MAX8893_BUCK,
+		.initdata = &u1_max8893_buck_data,
+	},
+	{
+		.id = MAX8893_LDO1,
+		.initdata = &u1_max8893_ldo1_data,
+	},
+	{
+		.id = MAX8893_LDO2,
+		.initdata = &u1_max8893_ldo2_data,
+	},
+	{
+		.id = MAX8893_LDO3,
+		.initdata = &u1_max8893_ldo3_data,
+	},
+	{
+		.id = MAX8893_LDO4,
+		.initdata = &u1_max8893_ldo4_data,
+	},
+	{
+		.id = MAX8893_LDO5,
+		.initdata = &u1_max8893_ldo5_data,
+	},
+};
+
+static struct max8893_platform_data u1_max8893_pdata = {
+	.num_subdevs = ARRAY_SIZE(u1_max8893_subdev_data),
+	.subdevs = u1_max8893_subdev_data,
+};
+
+static struct i2c_board_info i2c_devs4[] __initdata = {
+#if defined(CONFIG_WIMAX_CMC)
+	{
+		I2C_BOARD_INFO("max8893", 0x3E),
+		.platform_data = &u1_max8893_pdata,
 	},
 #endif /* CONFIG_WIMAX_CMC */
 };
+
 #endif
+#if defined(CONFIG_WIMAX_CMC)
+static struct i2c_gpio_platform_data wmxeeprom_i2c_gpio_data = {
+	.sda_pin  = GPIO_CMC_SDA_18V,
+	.scl_pin  = GPIO_CMC_SCL_18V,
+	.udelay = 2,
+};
+static struct platform_device wmxeeprom_i2c_gpio_device = {
+	.name	= "i2c-gpio",
+	.id	= 18,
+	.dev	= {
+		.platform_data  = &wmxeeprom_i2c_gpio_data,
+	},
+};
+static struct i2c_board_info wmxeeprom_i2c_devices[] __initdata = {
+{
+	I2C_BOARD_INFO("wmxeeprom", 0x50),
+}
+};
+
+#endif /* CONFIG_WIMAX_CMC */
 
 #ifdef CONFIG_S3C_DEV_I2C5
 /* I2C5 */
@@ -5131,27 +5294,6 @@ static struct i2c_board_info i2c_devs12_emul[] __initdata = {
 	/* need to work here */
 };
 #endif
-
-#if defined(CONFIG_WIMAX_CMC) && defined(CONFIG_TARGET_LOCALE_NA)
-static struct i2c_gpio_platform_data wmxeeprom_i2c_gpio_data = {
-	.sda_pin  = GPIO_CMC_SDA_18V,
-	.scl_pin  = GPIO_CMC_SCL_18V,
-	.udelay = 2,
-};
-static struct platform_device wmxeeprom_i2c_gpio_device = {
-	.name	= "i2c-gpio",
-	.id	= 18,
-	.dev	= {
-		.platform_data  = &wmxeeprom_i2c_gpio_data,
-	},
-};
-static struct i2c_board_info wmxeeprom_i2c_devices[] __initdata = {
-{
-	I2C_BOARD_INFO("wmxeeprom", 0x50),
-}
-};
-
-#endif /* CONFIG_WIMAX_CMC */
 
 #ifdef CONFIG_S3C_DEV_I2C17_EMUL
 /* I2C17_EMUL */
@@ -5648,6 +5790,9 @@ static struct platform_device *smdkc210_devices[] __initdata = {
 #ifdef CONFIG_BATTERY_SAMSUNG
 	&samsung_device_battery,
 #endif
+#ifdef	CONFIG_LEDS_GPIO
+	&sec_device_leds_gpio,
+#endif
 #ifdef CONFIG_FB_S5P
 	&s3c_device_fb,
 #endif
@@ -5663,9 +5808,10 @@ static struct platform_device *smdkc210_devices[] __initdata = {
 #if defined(CONFIG_S3C_DEV_I2C3)
 	&s3c_device_i2c3,
 #endif
-#if defined(CONFIG_S3C_DEV_I2C4)
+//#if defined(CONFIG_S3C_DEV_I2C4)
+//#if defined(CONFIG_TARGET_LOCALE_NA)
 	&s3c_device_i2c4,
-#endif
+//#endif
 #if defined(CONFIG_S3C_DEV_I2C5)
 	&s3c_device_i2c5,
 #endif
@@ -5699,7 +5845,7 @@ static struct platform_device *smdkc210_devices[] __initdata = {
 #ifdef CONFIG_SAMSUNG_MHL
 		&s3c_device_i2c15,
 #endif
-#if defined(CONFIG_WIMAX_CMC) && defined(CONFIG_TARGET_LOCALE_NA)
+#if defined(CONFIG_WIMAX_CMC)
 	&wmxeeprom_i2c_gpio_device,
 #endif
 #ifdef CONFIG_FM_SI4709_MODULE
@@ -5716,8 +5862,10 @@ static struct platform_device *smdkc210_devices[] __initdata = {
 	/* consumer driver should resume after resuming i2c drivers */
 	&u1_regulator_consumer,
 
+#ifndef CONFIG_TARGET_LOCALE_NA
 #ifdef CONFIG_EXYNOS4_DEV_MSHC
 	&s3c_device_mshci,
+#endif
 #endif
 
 #ifdef CONFIG_S3C_DEV_HSMMC
@@ -5819,9 +5967,16 @@ static struct platform_device *smdkc210_devices[] __initdata = {
 	&s5p_device_cec,
 	&s5p_device_hpd,
 #endif
-#if defined(CONFIG_WIMAX_CMC) && defined(CONFIG_TARGET_LOCALE_NA)
+#if defined(CONFIG_WIMAX_CMC)
 	&s3c_device_cmc732,
 #endif
+	
+#ifdef CONFIG_TARGET_LOCALE_NA
+#ifdef CONFIG_EXYNOS4_DEV_MSHC
+	&s3c_device_mshci,
+#endif
+#endif
+	
 #ifdef CONFIG_ANDROID_RAM_CONSOLE
 	&ram_console_device,
 #endif
@@ -6288,13 +6443,16 @@ static void __init smdkc210_machine_init(void)
 	s3c_i2c3_set_platdata(NULL);
 	i2c_register_board_info(3, i2c_devs3, ARRAY_SIZE(i2c_devs3));
 #endif
-#ifdef CONFIG_S3C_DEV_I2C4
+#ifdef CONFIG_TARGET_LOCALE_NA
+//#ifdef CONFIG_S3C_DEV_I2C4
 	s3c_i2c4_set_platdata(NULL);
 	i2c_register_board_info(4, i2c_devs4, ARRAY_SIZE(i2c_devs4));
 #endif
 #ifdef CONFIG_S3C_DEV_I2C5
 	s3c_i2c5_set_platdata(NULL);
+#ifndef CONFIG_TARGET_LOCALE_NA	
 	s3c_gpio_cfgpin(GPIO_PMIC_IRQ, S3C_GPIO_SFN(0xF));
+#endif
 	s3c_gpio_setpull(GPIO_PMIC_IRQ, S3C_GPIO_PULL_NONE);
 	i2c_devs5[0].irq = gpio_to_irq(GPIO_PMIC_IRQ);
 	i2c_register_board_info(5, i2c_devs5, ARRAY_SIZE(i2c_devs5));
@@ -6345,7 +6503,7 @@ static void __init smdkc210_machine_init(void)
 	i2c_register_board_info(12, i2c_devs12_emul,
 				ARRAY_SIZE(i2c_devs12_emul));
 #endif
-#if defined(CONFIG_WIMAX_CMC) && defined(CONFIG_TARGET_LOCALE_NA)
+#if defined(CONFIG_WIMAX_CMC)
 	i2c_register_board_info(18, wmxeeprom_i2c_devices, ARRAY_SIZE(wmxeeprom_i2c_devices));
 #endif
 #ifdef CONFIG_FM_SI4709_MODULE

@@ -51,7 +51,8 @@ struct device *m5mo_dev;
 /* #define M5MOSC_FW_PATH "RS_M5LS_SC.bin" */ /* ELECTRO-MECHANICS - S.LSI */
 /* #define M5MOCB_FW_PATH "RS_M5LS_CB.bin" */ /* CAMSYS - SONY */
 #if defined(CONFIG_TARGET_LOCALE_NA)
-/* #define M5MOOE_FW_PATH "RS_M5LS_OE.bin" */ /* FIBEROPTICS - SONY */
+#define M5MOOE_FW_PATH "RS_M5LS_OE.bin" /* FIBEROPTICS - SONY */
+#define M5MOOB_FW_PATH "RS_M5LS_OB.bin"	/* FIBEROPTICS - SONY */
 #endif
 #if defined(CONFIG_MACH_Q1_BD)
 #define M5MOOO_FW_PATH "RS_M5LS_OO.bin" /* FIBEROPTICS - SONY */
@@ -802,6 +803,10 @@ request_fw:
 
 		if (sensor_ver[0] == 'T' && sensor_ver[1] == 'B') {
 			err = request_firmware(&fw, M5MOTB_FW_PATH, dev);
+#if defined(CONFIG_TARGET_LOCALE_NA)
+		} else if ((sensor_ver[0] == 'O' && sensor_ver[1] == 'B') || (sensor_ver[0] == 'O' && sensor_ver[1] == 'E')) {
+			err = request_firmware(&fw, M5MOOE_FW_PATH, dev);
+#endif
 #if defined(CONFIG_MACH_Q1_BD)
 		} else if (sensor_ver[0] == 'O' && sensor_ver[1] == 'O') {
 			err = request_firmware(&fw, M5MOOO_FW_PATH, dev);
@@ -2308,6 +2313,10 @@ request_fw:
 
 	if (sensor_ver[0] == 'T' && sensor_ver[1] == 'B') {
 		err = request_firmware(&fw, M5MOTB_FW_PATH, dev);
+#if defined(CONFIG_TARGET_LOCALE_NA)
+	} else if ((sensor_ver[0] == 'O' && sensor_ver[1] == 'B') || (sensor_ver[0] == 'O' && sensor_ver[1] == 'E')) {
+		err = request_firmware(&fw, M5MOOE_FW_PATH, dev);
+#endif
 #if defined(CONFIG_MACH_Q1_BD)
 	} else if (sensor_ver[0] == 'O' && sensor_ver[1] == 'O') {
 		err = request_firmware(&fw, M5MOOO_FW_PATH, dev);

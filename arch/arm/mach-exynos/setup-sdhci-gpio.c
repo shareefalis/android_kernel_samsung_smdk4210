@@ -160,7 +160,7 @@ void exynos4_setup_sdhci3_cfg_gpio(struct platform_device *dev, int width)
 	struct s3c_sdhci_platdata *pdata = dev->dev.platform_data;
 	unsigned int gpio;
 
-	#if defined(CONFIG_WIMAX_CMC) && defined(CONFIG_TARGET_LOCALE_NA)
+#if defined(CONFIG_WIMAX_CMC)
 
 	if (gpio_get_value(GPIO_WIMAX_EN)) {
 		/* Set all the necessary GPK1[0:1] pins to special-function 2 */
@@ -175,7 +175,7 @@ void exynos4_setup_sdhci3_cfg_gpio(struct platform_device *dev, int width)
 			s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
 		}
 		//__raw_writel(0x3FFF, GPK3DRV);
-		__raw_writel(0x2AAA, GPK3DRV);	// for sdio noise
+		//__raw_writel(0x2AAA, GPK3DRV);	// for sdio noise
 
 		for (gpio = EXYNOS4_GPK3(0); gpio < EXYNOS4_GPK3(2); gpio++) {
 

@@ -582,11 +582,11 @@ config MUIC_MAX8997_OVPUI
 	  is used in Chinese models. When OVP is occurred, the battery UI
 	  must be changed to uncharging status.
 	  
-config WIMAX_CMC
-	bool "SUB PMIC FOR WIMAX CMC"
-	depends on I2C
-	help
-	  Sub PMIC for Raffaello
+#config WIMAX_CMC
+#	bool "SUB PMIC FOR WIMAX CMC"
+#	depends on I2C
+#	help
+#	  Sub PMIC for Raffaello
 	  
 config USBHUB_USB3803
 	bool "USB3803 USB HUB Driver"

@@ -1,7 +1,7 @@
 Initial support for Epic4gTouch
 -requires libMali, and the EGL files from the Intl SGS2 to boot
 
-UPDATED: 4/30/12
+UPDATED: 5/4/12
 
 What Works:
 Sound
@@ -11,17 +11,20 @@ WIFI
 BT
 USB
 Touchkeys
-IDPRAM (modem) updated: 4/30/12 -sb
+IDPRAM (modem) updated: 4/30/12 -SB
+Notification LED's 5/4/12 - SB
 
 What Doesn't Work:
-WiMAX - driver ported from 2.6 but fails to start
 Camera
 
-Needs fixing:
-Sensors are screwy
-Audio - speaker/call volumes are low
+Works But needs fixing:
+Rotation - flaky
+Speaker/Call Audio volumes are low
+Wimax - 5/4/12 SB - turns on and scans (haven't tested if it connects) but hangs phone when turning off
+	Note: Using Nexus S 4g drivers now
 
 
 Notes:
-- Phone will sometimes reboot when its unplugged, haven't pulled any logs to see whats causing it yet but I'm guessing its a power/battery issue
+-Random reboots while off charger seem to be gone - 5/4/12 SB
 -This will need lots of cleanup once everything works
+-This source is setup for CM's inline kernel building
