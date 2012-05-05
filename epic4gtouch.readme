@@ -2,7 +2,8 @@ Initial support for Epic4gTouch
 -requires libMali, and the EGL files from the Intl SGS2 to boot
 
 UPDATED: 5/4/12
-
+******** I take no responsibility for what happens if you use this *********
+		-sbrissen
 What Works:
 Sound
 Internal Storage
@@ -22,9 +23,11 @@ Rotation - flaky
 Speaker/Call Audio volumes are low
 Wimax - 5/4/12 SB - turns on and scans (haven't tested if it connects) but hangs phone when turning off
 	Note: Using Nexus S 4g drivers now
+		-If you need to turn off wimax, reboot phone and quickly turn it off, seems to be the only time it will turn off.
 
 
 Notes:
 -Random reboots while off charger seem to be gone - 5/4/12 SB
 -This will need lots of cleanup once everything works
 -This source is setup for CM's inline kernel building
+-Using a custom recovery does NOT seem to be bricking phones with this source
