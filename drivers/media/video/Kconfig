@@ -493,6 +493,12 @@ config VIDEO_S5K5BAFX
 	depends on I2C && VIDEO_V4L2 && VIDEO_FIMC_MIPI
 	---help---
 	  This driver supports S5K5BAFX SoC camera module
+	  
+config VIDEO_S5K5BBGX
+	tristate "S5K5BBGX supporting camera driver"
+	depends on I2C && VIDEO_V4L2 && VIDEO_FIMC_MIPI
+	---help---
+	  This driver supports S5K5BBGX SoC camera module
 
 config VIDEO_S5K5CCGX_COMMON
 	tristate "S5K5CCGX supporting camera driver"
@@ -606,7 +612,7 @@ prompt "Select ITU / MIPI Camera port"
 default ITU_A
 config ITU_A
 	bool "ITU Camera A port"
-	depends on !(VIDEO_FIMC_MIPI || VIDEO_S5P_MIPI_CSIS ||\
+	depends on (VIDEO_FIMC_MIPI || VIDEO_S5P_MIPI_CSIS ||\
 			VIDEO_EXYNOS_MIPI_CSIS)
 	help
 	  This enables support for ITU A port

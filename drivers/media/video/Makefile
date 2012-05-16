@@ -81,6 +81,7 @@ obj-$(CONFIG_VIDEO_S5K5BAFX)	+= s5k5bafx-v2.o
 else
 obj-$(CONFIG_VIDEO_S5K5BAFX)	+= s5k5bafx.o
 endif
+obj-$(CONFIG_VIDEO_S5K5BBGX)	+= s5k5bbgx.o
 obj-$(CONFIG_VIDEO_S5K5CCGX_P8) 	+= s5k5ccgx.o
 obj-$(CONFIG_VIDEO_S5K5CCGX_P4W) 	+= s5k5ccgx.o
 obj-$(CONFIG_VIDEO_S5K5CCGX_P2)		+= s5k5ccgx.o

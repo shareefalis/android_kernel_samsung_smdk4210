@@ -3071,8 +3071,6 @@ static int multipdp_init(void)
     pdp_arg_t pdp_args[NUM_PDP_CONTEXT] = {
         { .id = 1, .ifname = "ttyCSD" },
         { .id = 7, .ifname = "ttyCDMA" },
-        { .id = 9, .ifname = "ttyTRFB" },
-        { .id = 27, .ifname = "ttyCIQ" },
         { .id = 29, .ifname = "ttyCPLOG" },
     };
 
@@ -3098,15 +3096,6 @@ static int dpram_init_hw(void)
 
 
     //1) Initialize the interrupt pins
-/*	s5p_register_gpio_interrupt(GPIO_QSC_INT);
-	s5p_register_gpio_interrupt(IRQ_QSC_INT);
-	s5p_register_gpio_interrupt(GPIO_C210_DPRAM_INT_N);
-	s5p_register_gpio_interrupt(GPIO_QSC_PHONE_ACTIVE);
-	s5p_register_gpio_interrupt(GPIO_QSC_PHONE_RST);
-	s5p_register_gpio_interrupt(GPIO_CP_DUMP_INT);
-	s5p_register_gpio_interrupt(GPIO_PDA_ACTIVE);
-	s5p_register_gpio_interrupt(GPIO_QSC_PHONE_ON);
-	s5p_register_gpio_interrupt(GPIO_CP_REQ_RESET);*/
 	
     irq_set_irq_type(IRQ_DPRAM_AP_INT_N, IRQ_TYPE_LEVEL_LOW);
 
@@ -3123,7 +3112,6 @@ static int dpram_init_hw(void)
     irq_set_irq_type(dpram_wakeup_irq, IRQ_TYPE_EDGE_RISING);
 
     rv = gpio_request(IRQ_QSC_PHONE_ACTIVE, "gpx1_6");
-//	s5p_register_gpio_interrupt(rv);
     if(rv < 0) {
         printk("IDPRAM: [%s] failed to get gpio GPX1_6\n",__func__);
 	goto err1;
@@ -3133,7 +3121,6 @@ static int dpram_init_hw(void)
 
     s3c_gpio_setpull(GPIO_QSC_PHONE_ACTIVE, S3C_GPIO_PULL_NONE);
     s3c_gpio_setpull(GPIO_QSC_PHONE_RST, S3C_GPIO_PULL_NONE);
-//    set_irq_type(IRQ_QSC_ACTIVE, IRQ_TYPE_EDGE_BOTH);
     irq_set_irq_type(phone_active_irq, IRQ_TYPE_EDGE_FALLING);
 
 

@@ -16,6 +16,7 @@
 		printk(args);				\
 		printk("\x1b[0m\n");			\
 	}
+extern int wimax_pmic_set_voltage(void);
 
 extern int s3c_bat_use_wimax(int onoff);
 
@@ -52,11 +53,11 @@ void wimax_on_pin_conf(int onoff)
 
 }
 
-/*static void store_uart_path(void)
+static void store_uart_path(void)
 {
 	wimax_config.uart_sel = gpio_get_value(GPIO_UART_SEL);
 	wimax_config.uart_sel1 = gpio_get_value(GPIO_UART_SEL1);
-}*/
+}
 
 static void wimax_deinit_gpios(void);
 static void wimax_wakeup_assert(int enable)
@@ -123,7 +124,9 @@ static void wimax_init_gpios(void)
 
 static void hw_set_wimax_mode(void)
 {
-      dump_debug("[WIMAX] hw_set_wimax_mode");
+      dump_debug("[WIMAX] hw_set_wimax_mode - %i", wimax_config.wimax_mode);
+		gpio_set_value(GPIO_WIMAX_WAKEUP, 1);
+		gpio_set_value(GPIO_WIMAX_IF_MODE0, 1);
 	switch (wimax_config.wimax_mode) {
 	case SDIO_MODE:
 		pr_debug("SDIO MODE");
@@ -155,41 +158,17 @@ static void wimax_hsmmc_presence_check(void)
 	sdhci_s3c_force_presence_change(&s3c_device_hsmmc3);
 }
 
-/*static void display_gpios(void)
-{
-	int val = 0;
-	val = gpio_get_value(GPIO_WIMAX_EN);
-	dump_debug("WIMAX_EN: %d", val);
-	val = gpio_get_value(GPIO_WIMAX_RESET_N);
-	dump_debug("WIMAX_RESET: %d", val);
-	val = gpio_get_value(GPIO_WIMAX_CON0);
-	dump_debug("WIMAX_CON0: %d", val);
-	val = gpio_get_value(GPIO_WIMAX_CON1);
-	dump_debug("WIMAX_CON1: %d", val);
-	val = gpio_get_value(GPIO_WIMAX_CON2);
-	dump_debug("WIMAX_CON2: %d", val);
-	val = gpio_get_value(GPIO_WIMAX_WAKEUP);
-	dump_debug("WIMAX_WAKEUP: %d", val);
-	val = gpio_get_value(GPIO_WIMAX_INT);
-	dump_debug("WIMAX_INT: %d", val);
-	val = gpio_get_value(GPIO_WIMAX_IF_MODE0);
-	dump_debug("WIMAX_IF_MODE0: %d", val);
-	val = gpio_get_value(GPIO_WIMAX_IF_MODE1);
-	dump_debug("WIMAX_IF_MODE1: %d", val);
-	val = gpio_get_value(GPIO_WIMAX_USB_EN);
-	dump_debug("WIMAX_USB_EN: %d", val);
-	val = gpio_get_value(GPIO_WIMAX_I2C_CON);
-	dump_debug("I2C_SEL: %d", val);
-	val = gpio_get_value(GPIO_UART_SEL);
-	dump_debug("UART_SEL1: %d", val);
-}*/
 
 static int gpio_wimax_power(int enable)
 {
 	int try_count = 0;
-
-	if (!enable)
+	if (enable)
+		goto wimax_power_on;
+	else
 		goto wimax_power_off;
+
+	
+wimax_power_on:	
 	if (gpio_get_value(GPIO_WIMAX_EN)) {
 		dump_debug("Already Wimax powered ON");
 		return WIMAX_ALREADY_POWER_ON;
@@ -204,11 +183,11 @@ static int gpio_wimax_power(int enable)
 	if (wimax_config.wimax_mode != SDIO_MODE) {
 	      dump_debug("Wimax power ON - !SDIO_MODE");
 		switch_usb_wimax();
-		//s3c_bat_use_wimax(1);
+		s3c_bat_use_wimax(1);
 	}
 	if (wimax_config.wimax_mode == WTM_MODE) {
 		dump_debug("Wimax power ON - !WTM_MODE");
-		//store_uart_path();
+		store_uart_path();
 		switch_uart_wimax();
 	}
 	switch_eeprom_wimax();
@@ -218,6 +197,7 @@ static int gpio_wimax_power(int enable)
 	gpio_set_value(GPIO_WIMAX_EN, 1);
 	dump_debug("Wimax power ON - gpio_set_value(GPIO_WIMAX_EN, GPIO_LEVEL_HIGH)");
 	wimax_init_gpios();
+	wimax_pmic_set_voltage();
 	dump_debug("Wimax power ON - wimax_init_gpios()");
 	dump_debug("RESET");
 	gpio_set_value(GPIO_WIMAX_RESET_N, 0);
@@ -234,39 +214,51 @@ static int gpio_wimax_power(int enable)
 	return WIMAX_POWER_SUCCESS;
 wimax_power_off:
 	/*Wait for modem to flush EEPROM data*/
-	//mutex_lock(&wimax_config.poweroff_mutex);
+	mutex_lock(&wimax_config.poweroff_mutex);
+	if (!gpio_get_value(GPIO_WIMAX_EN)) {
+		dump_debug("Already Wimax powered OFF");
+		mutex_unlock(&wimax_config.poweroff_mutex);
+		return WIMAX_ALREADY_POWER_OFF;	/* already power off */
+	}
+	while (!wimax_config.powerup_done) {
+		msleep(500);
+		dump_debug("Wimax waiting for power Off ");
+	}
 	pr_debug("Wimax power OFF - SBRISSEN");
-	wimax_on_pin_conf(0);
-	pr_debug("Wimax power OFF - SBRISSEN - wimax_on_pin_conf");
+	
 	msleep(500);
 	wimax_deinit_gpios();
+	pr_debug("Wimax power OFF-hsmmc-presence-check");
+	wimax_hsmmc_presence_check();	
+	msleep(500);
 
-	pr_debug("Wimax power OFF");
-
-	/*Dont force detect if the card is already detected as removed*/
-	if (!wimax_config.card_removed){
-	      pr_debug("Wimax power OFF-hsmmc-presence-check");
-		wimax_hsmmc_presence_check();
+	if (wimax_config.wimax_mode != SDIO_MODE) {
+		s3c_bat_use_wimax(0);
 	}
+	wimax_on_pin_conf(0);
+	pr_debug("Wimax power OFF");
+	mutex_unlock(&wimax_config.poweroff_mutex);
+	/*Dont force detect if the card is already detected as removed*/
+	//if (!wimax_config.card_removed){
 
-	/*Not critial, just some safty margin*/
-	msleep(300);
-	//mutex_unlock(&wimax_config.poweroff_mutex);
+	//}
+	
 	return WIMAX_POWER_SUCCESS;
+
 }
 
 
 
-/*static void restore_uart_path(void)
+static void restore_uart_path(void)
 {
 	gpio_set_value(GPIO_UART_SEL, wimax_config.uart_sel);
 	gpio_set_value(GPIO_UART_SEL1, wimax_config.uart_sel1);
-}*/
+}
 
-/*static void switch_uart_ap(void)
+static void switch_uart_ap(void)
 {
 	gpio_set_value(GPIO_UART_SEL, GPIO_LEVEL_HIGH);
-}*/
+}
 
 static struct wimax732_platform_data wimax732_pdata = {
 	.power = gpio_wimax_power,
@@ -275,12 +267,10 @@ static struct wimax732_platform_data wimax732_pdata = {
 	.get_sleep_mode = get_wimax_sleep_mode,
 	.is_modem_awake = is_wimax_active,
 	.wakeup_assert = wimax_wakeup_assert,
-	//.uart_wimax = switch_uart_wimax,
-	//.uart_ap = switch_uart_ap,
-	//.gpio_display = display_gpios,
-	//.restore_uart_path = restore_uart_path,
+	.uart_wimax = switch_uart_wimax,
+	.uart_ap = switch_uart_ap,
+	.restore_uart_path = restore_uart_path,
 	.g_cfg = &wimax_config,
-	//.wimax_int	= GPIO_USB_SEL,
 };
 
 struct platform_device s3c_device_cmc732 = {
@@ -345,10 +335,12 @@ void wimax_deinit_gpios(void)
 
 	switch_usb_ap();
 	
-	//wimax732_pdata.wimax_int = GPIO_USB_SEL;
 }
 
 #endif
+
+
+
 
 
 

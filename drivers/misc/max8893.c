@@ -79,7 +79,7 @@ int wimax_pmic_set_voltage(void)
         int i;
 #endif
 		printk("[WIMAX_BEBUG] wimax_pmic_set_voltage");
-		//mdelay(10);
+		mdelay(10);
         ret = (
         max8893_set_voltage(BUCK, 1200)|
         max8893_set_voltage(LDO1, 2800)|
