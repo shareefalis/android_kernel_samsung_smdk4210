@@ -3071,6 +3071,8 @@ static int multipdp_init(void)
     pdp_arg_t pdp_args[NUM_PDP_CONTEXT] = {
         { .id = 1, .ifname = "ttyCSD" },
         { .id = 7, .ifname = "ttyCDMA" },
+        { .id = 9, .ifname = "ttyTRFB" },
+        { .id = 27, .ifname = "ttyCIQ" },
         { .id = 29, .ifname = "ttyCPLOG" },
     };
 
