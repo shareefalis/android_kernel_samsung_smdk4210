@@ -87,7 +87,7 @@ void process_indicate_packet(struct net_adapter *adapter, u_char *buffer)
 						dump_debug("%s: F/W Download Complete and Running ",__func__);
 					dump_debug("Wait for SDIO ready...");
 
-		  kernel_thread((int (*)(void *))hw_get_mac_address, adapter, 0);
+		 // kernel_thread((int (*)(void *))hw_get_mac_address, adapter, 0);
 
 		} else if (g_cfg->wimax_mode == WTM_MODE
 				|| g_cfg->wimax_mode == AUTH_MODE) {

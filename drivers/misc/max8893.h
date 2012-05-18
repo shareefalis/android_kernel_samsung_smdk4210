@@ -30,7 +30,7 @@
 *		BUCK is marked as LDO "-1"
 */
 
-#define BUCK (-1)
+#define BUCK 0
 #define LDO1 1
 #define LDO2 2
 #define LDO3 3

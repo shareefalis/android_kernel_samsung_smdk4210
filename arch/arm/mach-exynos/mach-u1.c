@@ -2942,6 +2942,64 @@ static struct max8997_motor_data max8997_motor = {
 #endif	/*CONFIG_TARGET_LOCALE_KOR*/
 #endif
 
+#if defined(CONFIG_TARGET_LOCALE_NA)
+#define USB_PATH_AP	0
+#define USB_PATH_CP	1
+#define USB_PATH_ALL	2
+extern int hub_usb_path;
+static int max8997_muic_set_safeout_na(int path)
+{
+	struct regulator *regulator;
+
+	if (hub_usb_path == USB_PATH_CP) {
+		regulator = regulator_get(NULL, "safeout1");
+		if (IS_ERR(regulator))
+			return -ENODEV;
+		if (regulator_is_enabled(regulator))
+			regulator_force_disable(regulator);
+		regulator_put(regulator);
+
+		regulator = regulator_get(NULL, "safeout2");
+		if (IS_ERR(regulator))
+			return -ENODEV;
+		if (!regulator_is_enabled(regulator))
+			regulator_enable(regulator);
+		regulator_put(regulator);
+	} else if (hub_usb_path == USB_PATH_AP) {
+		regulator = regulator_get(NULL, "safeout1");
+		if (IS_ERR(regulator))
+			return -ENODEV;
+		if (!regulator_is_enabled(regulator))
+			regulator_enable(regulator);
+		regulator_put(regulator);
+
+		regulator = regulator_get(NULL, "safeout2");
+		if (IS_ERR(regulator))
+			return -ENODEV;
+		if (regulator_is_enabled(regulator))
+			regulator_force_disable(regulator);
+		regulator_put(regulator);
+	} else if (hub_usb_path == USB_PATH_ALL) {
+		regulator = regulator_get(NULL, "safeout1");
+		if (IS_ERR(regulator))
+			return -ENODEV;
+		if (!regulator_is_enabled(regulator))
+			regulator_enable(regulator);
+		regulator_put(regulator);
+
+		regulator = regulator_get(NULL, "safeout2");
+		if (IS_ERR(regulator))
+			return -ENODEV;
+		if (!regulator_is_enabled(regulator))
+			regulator_enable(regulator);
+		regulator_put(regulator);
+	}
+
+	return 0;
+}
+#endif /* CONFIG_TARGET_LOCALE_NA */
+
+
 #ifdef CONFIG_MACH_U1_KOR_LGT
 static int max8997_muic_set_safeout(int path)
 {
@@ -3264,14 +3322,22 @@ static struct max8997_muic_data max8997_muic = {
 	.charger_cb = max8997_muic_charger_cb,
 	.mhl_cb = max8997_muic_mhl_cb,
 	.is_mhl_attached = max8997_muic_is_mhl_attached,
+#ifdef CONFIG_TARGET_LOCALE_NA
+	.set_safeout = max8997_muic_set_safeout_na,
+#else
 	.set_safeout = max8997_muic_set_safeout,
+#endif /* CONFIG_TARGET_LOCALE_NA */
 	.init_cb = max8997_muic_init_cb,
 	.deskdock_cb = max8997_muic_deskdock_cb,
 	.cardock_cb = max8997_muic_cardock_cb,
 	.cfg_uart_gpio = max8997_muic_cfg_uart_gpio,
 	.jig_uart_cb = max8997_muic_jig_uart_cb,
 	.host_notify_cb = max8997_muic_host_notify_cb,
+#if defined(CONFIG_TARGET_LOCALE_NA)
+	.gpio_uart_sel = GPIO_UART_SEL,
+#else
 	.gpio_usb_sel = GPIO_USB_SEL,
+#endif /* CONFIG_TARGET_LOCALE_NA */
 
 };
 
@@ -6700,9 +6766,9 @@ static void __init smdkc210_machine_init(void)
 #endif
 #ifdef CONFIG_S3C_DEV_I2C5
 	s3c_i2c5_set_platdata(NULL);
-#ifndef CONFIG_TARGET_LOCALE_NA	
+//#ifndef CONFIG_TARGET_LOCALE_NA	
 	s3c_gpio_cfgpin(GPIO_PMIC_IRQ, S3C_GPIO_SFN(0xF));
-#endif
+//#endif
 	s3c_gpio_setpull(GPIO_PMIC_IRQ, S3C_GPIO_PULL_NONE);
 	i2c_devs5[0].irq = gpio_to_irq(GPIO_PMIC_IRQ);
 	i2c_register_board_info(5, i2c_devs5, ARRAY_SIZE(i2c_devs5));

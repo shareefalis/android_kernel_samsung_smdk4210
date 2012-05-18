@@ -22,6 +22,7 @@ Works But needs fixing:
 Rotation - flaky
 Speaker/Call Audio volumes are low
 Wimax - reverted back to og drivers, hangs phone on turning on - 05/16/12 SB
+	- add set_usb_path from 2.6 which affects wimax
 
 
 Notes:

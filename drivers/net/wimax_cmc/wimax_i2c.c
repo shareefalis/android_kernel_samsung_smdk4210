@@ -137,12 +137,13 @@ const struct i2c_device_id wmxeeprom_id[]={
 
 MODULE_DEVICE_TABLE(i2c, wmxeeprom_id);
 static struct i2c_driver wmxeeprom_driver = {
-	.probe 		= wmxeeprom_probe,
-	.remove 	= wmxeeprom_remove,
-	.id_table	= wmxeeprom_id,
 	.driver = {		
 		.name   = "wmxeeprom",
 	},
+	.probe 		= wmxeeprom_probe,
+	.remove 	= wmxeeprom_remove,
+	.id_table	= wmxeeprom_id,
+
 };
 int wmxeeprom_init(void)
 {

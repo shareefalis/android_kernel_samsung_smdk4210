@@ -125,8 +125,8 @@ static void wimax_init_gpios(void)
 static void hw_set_wimax_mode(void)
 {
       dump_debug("[WIMAX] hw_set_wimax_mode - %i", wimax_config.wimax_mode);
-		gpio_set_value(GPIO_WIMAX_WAKEUP, 1);
-		gpio_set_value(GPIO_WIMAX_IF_MODE0, 1);
+		//gpio_set_value(GPIO_WIMAX_WAKEUP, 1);
+		//gpio_set_value(GPIO_WIMAX_IF_MODE0, 1);
 	switch (wimax_config.wimax_mode) {
 	case SDIO_MODE:
 		pr_debug("SDIO MODE");
@@ -207,10 +207,10 @@ wimax_power_on:
 	gpio_set_value(GPIO_WIMAX_RESET_N, 1);
 	msleep(400);
 	dump_debug("Wimax power ON - msleep(400)");
-	if (wimax_config.card_removed){
+//	if (wimax_config.card_removed){
 		wimax_hsmmc_presence_check();
-		dump_debug("Wimax power ON - wimax_hsmmc_presence_check()");
-	}
+	//	dump_debug("Wimax power ON - wimax_hsmmc_presence_check()");
+	//}
 	return WIMAX_POWER_SUCCESS;
 wimax_power_off:
 	/*Wait for modem to flush EEPROM data*/
@@ -220,10 +220,10 @@ wimax_power_off:
 		mutex_unlock(&wimax_config.poweroff_mutex);
 		return WIMAX_ALREADY_POWER_OFF;	/* already power off */
 	}
-	while (!wimax_config.powerup_done) {
+	/*while (!wimax_config.powerup_done) {
 		msleep(500);
 		dump_debug("Wimax waiting for power Off ");
-	}
+	}*/
 	pr_debug("Wimax power OFF - SBRISSEN");
 	
 	msleep(500);
@@ -267,8 +267,8 @@ static struct wimax732_platform_data wimax732_pdata = {
 	.get_sleep_mode = get_wimax_sleep_mode,
 	.is_modem_awake = is_wimax_active,
 	.wakeup_assert = wimax_wakeup_assert,
-	.uart_wimax = switch_uart_wimax,
-	.uart_ap = switch_uart_ap,
+//.uart_wimax = switch_uart_wimax,
+//	.uart_ap = switch_uart_ap,
 	.restore_uart_path = restore_uart_path,
 	.g_cfg = &wimax_config,
 };

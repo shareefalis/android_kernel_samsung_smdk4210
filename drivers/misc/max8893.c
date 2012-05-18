@@ -181,7 +181,7 @@ static void __exit max8893_wmx_pmic_exit(void)
 {
 	i2c_del_driver(&max8893_wmx_driver);
 }
-subsys_initcall(max8893_wmx_pmic_init);
+module_init(max8893_wmx_pmic_init);
 module_exit(max8893_wmx_pmic_exit);
 MODULE_DESCRIPTION("MAXIM 8893 PMIC driver for WiMAX");
 MODULE_AUTHOR("SAMSUNG ELECTRONICS");

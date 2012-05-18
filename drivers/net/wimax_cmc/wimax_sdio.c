@@ -71,10 +71,10 @@ EXPORT_SYMBOL(s3c_bat_use_wimax);
 static const struct file_operations swmx_fops = {
 owner:THIS_MODULE,
 open	:	swmxdev_open,
-release	:	swmxdev_release,
+//release	:	swmxdev_release,
 unlocked_ioctl	:	swmxdev_ioctl,
-read	:	swmxdev_read,
-write	:	swmxdev_write,
+//read	:	swmxdev_read,
+//write	:	swmxdev_write,
 };
 
 static struct miscdevice swmxctl_dev = {
@@ -321,10 +321,10 @@ int uwbrdev_release(struct inode *inode, struct file *file)
 static const struct file_operations uwbr_fops = {
 owner:THIS_MODULE,
 open	:	uwbrdev_open,
-release	:	uwbrdev_release,
+//release	:	uwbrdev_release,
 unlocked_ioctl	:	uwbrdev_ioctl,
 read	:	uwbrdev_read,
-write	:	uwbrdev_write,
+//write	:	uwbrdev_write,
 };
 
 static struct miscdevice uwibro_dev = {
@@ -794,6 +794,7 @@ int adapter_probe(struct sdio_func *func,
 	struct net_device	*net;
 
 
+
 	u_char			charName[32];
 	int			nRes = -ENOMEM;
 	u_long			idx = 0;
@@ -1022,6 +1023,7 @@ void adapter_remove(struct sdio_func *func)
 
 
 
+
 static ssize_t eeprom_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
@@ -1095,6 +1097,7 @@ static ssize_t eeprom_store(struct device *dev,
 		msleep(10);
 		pdata->wakeup_assert(0);
 	}
+
 
 	return count - 1;
 
@@ -1433,13 +1436,14 @@ int wimax_resume(struct platform_device *pdev)
 }
 
 static struct platform_driver wimax_driver = {
-	.probe          = wimax_probe,
-	.remove         = wimax_remove,
-	.suspend                = wimax_suspend,
-	.resume                 = wimax_resume,
 	.driver         = {
 		.name   = "wimax732_driver",
-	}
+	},
+	.probe          = wimax_probe,
+	.remove         = wimax_remove,
+	.suspend        = wimax_suspend,
+	.resume         = wimax_resume,
+
 };
 
 static int __init adapter_init_module(void)

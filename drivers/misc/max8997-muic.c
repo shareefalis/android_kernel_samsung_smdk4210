@@ -1560,8 +1560,13 @@ static int __devinit max8997_muic_probe(struct platform_device *pdev)
 		goto err_input;
 	}
 
-	if (info->muic_data && gpio_is_valid(info->muic_data->gpio_usb_sel)) {
+#ifdef CONFIG_TARGET_LOCALE_NA
+	if (gpio_is_valid(info->muic_data->gpio_uart_sel)) {
+		CHECK_GPIO(info->muic_data->gpio_uart_sel, "UART_SEL");
+#else
+	if (gpio_is_valid(info->muic_data->gpio_usb_sel)) {
 		CHECK_GPIO(info->muic_data->gpio_usb_sel, "USB_SEL");
+#endif /* CONFIG_TARGET_LOCALE_NA */
 
 		if (info->muic_data->cfg_uart_gpio)
 			info->muic_data->uart_path =
@@ -1590,6 +1595,7 @@ static int __devinit max8997_muic_probe(struct platform_device *pdev)
 			"failed to create max8997 muic attribute group\n");
 		goto fail;
 	}
+
 
 	if (info->muic_data && info->muic_data->init_cb)
 		info->muic_data->init_cb();
