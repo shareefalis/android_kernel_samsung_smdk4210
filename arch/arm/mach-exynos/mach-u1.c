@@ -3125,6 +3125,7 @@ static int max8997_muic_charger_cb(int cable_type)
 		is_cable_attached = true;
 		break;
 	case CABLE_TYPE_MHL_VB:
+	case CABLE_TYPE_OTG_VB:
 		value.intval = POWER_SUPPLY_TYPE_MISC;
 		is_cable_attached = true;
 		break;
@@ -3168,7 +3169,7 @@ struct platform_device host_notifier_device = {
 };
 
 #include "u1-otg.c"
-static void max8997_muic_usb_cb(u8 usb_mode)
+static void max8997_muic_usb_cb(u8 usb_mode, bool bus_powered)
 {
 	struct s3c_udc *udc = platform_get_drvdata(&s3c_device_usbgadget);
 	int ret = 0;
@@ -3207,16 +3208,19 @@ static void max8997_muic_usb_cb(u8 usb_mode)
 #endif
 
 	if (udc) {
-		if (usb_mode == USB_OTGHOST_ATTACHED) {
+		if (usb_mode == USB_OTGHOST_ATTACHED && !bus_powered) {
 			usb_otg_accessory_power(1);
 			max8997_muic_charger_cb(CABLE_TYPE_OTG);
+		} else if (usb_mode == USB_OTGHOST_ATTACHED) {
+			pr_info("%s: usb vbus powered host\n", __func__);
+			usb_otg_accessory_power(0);
 		}
 
 		ret = c210_change_usb_mode(udc, usb_mode);
 		if (ret < 0)
 			pr_err("%s: fail to change mode!!!\n", __func__);
 
-		if (usb_mode == USB_OTGHOST_DETACHED)
+		if (usb_mode == USB_OTGHOST_DETACHED && !bus_powered)
 			usb_otg_accessory_power(0);
 	} else
 		pr_info("otg error s3c_udc is null.\n");
@@ -3414,6 +3418,9 @@ static void set_shared_mic_bias(void)
 void sec_set_sub_mic_bias(bool on)
 {
 #ifdef CONFIG_SND_SOC_USE_EXTERNAL_MIC_BIAS
+#if defined(CONFIG_MACH_Q1_BD)
+	gpio_set_value(GPIO_SUB_MIC_BIAS_EN, on);
+#else
 	if (system_rev < SYSTEM_REV_SND) {
 		unsigned long flags;
 		spin_lock_irqsave(&mic_bias_lock, flags);
@@ -3422,13 +3429,16 @@ void sec_set_sub_mic_bias(bool on)
 		spin_unlock_irqrestore(&mic_bias_lock, flags);
 	} else
 		gpio_set_value(GPIO_SUB_MIC_BIAS_EN, on);
-
+#endif
 #endif
 }
 
 void sec_set_main_mic_bias(bool on)
 {
 #ifdef CONFIG_SND_SOC_USE_EXTERNAL_MIC_BIAS
+#if defined(CONFIG_MACH_Q1_BD)
+	gpio_set_value(GPIO_MIC_BIAS_EN, on);
+#else
 	if (system_rev < SYSTEM_REV_SND) {
 		unsigned long flags;
 		spin_lock_irqsave(&mic_bias_lock, flags);
@@ -3437,6 +3447,7 @@ void sec_set_main_mic_bias(bool on)
 		spin_unlock_irqrestore(&mic_bias_lock, flags);
 	} else
 		gpio_set_value(GPIO_MIC_BIAS_EN, on);
+#endif
 #endif
 }
 
@@ -4289,10 +4300,14 @@ struct platform_device u1_keypad = {
 #ifdef CONFIG_SEC_DEV_JACK
 static void sec_set_jack_micbias(bool on)
 {
+#if defined(CONFIG_MACH_Q1_BD)
+	gpio_set_value(GPIO_EAR_MIC_BIAS_EN, on);
+#else
 	if (system_rev >= 3)
 		gpio_set_value(GPIO_EAR_MIC_BIAS_EN, on);
 	else
 		gpio_set_value(GPIO_MIC_BIAS_EN, on);
+#endif
 }
 
 static struct sec_jack_zone sec_jack_zones[] = {
@@ -4328,8 +4343,13 @@ static struct sec_jack_zone sec_jack_zones[] = {
 		 * stays in this range for 100ms (10ms delays, 10 samples)
 		 */
 		.adc_high = 3800,
+#if defined (CONFIG_MACH_Q1_BD)
+		.delay_ms = 15,
+		.check_count = 20,
+#else
 		.delay_ms = 10,
 		.check_count = 5,
+#endif
 		.jack_type = SEC_HEADSET_4POLE,
 	},
 	{
@@ -5937,9 +5957,13 @@ static struct platform_device ram_console_device = {
 	.resource = ram_console_resource,
 };
 
+#define RAM_CONSOLE_CMDLINE ("0x100000@0x5e900000")
+
 static int __init setup_ram_console_mem(char *str)
 {
-	unsigned size = memparse(str, &str);
+	unsigned size;
+	str = RAM_CONSOLE_CMDLINE;
+	size = memparse(str, &str);
 
 	if (size && (*str == '@')) {
 		unsigned long long base = 0;
@@ -5958,7 +5982,12 @@ static int __init setup_ram_console_mem(char *str)
 	return 0;
 }
 
-__setup("ram_console=", setup_ram_console_mem);
+/* without modifying the bootloader or harcoding cmdlines (which can mess up reboots), no way to pass 
+   a ram_console command line.  Just work around that little issue by triggering on a different parameter
+   and hardcoding the parameters to ram_console in the function */
+__setup("loglevel=", setup_ram_console_mem);
+
+/* __setup("ram_console=", setup_ram_console_mem); */
 #endif
 
 #ifdef CONFIG_ANDROID_PMEM
@@ -6649,14 +6678,6 @@ static void __init smdkc210_map_io(void)
 	s5p_reserve_mem(S5P_RANGE_MFC);
 #endif
 
-#ifdef CONFIG_ANDROID_RAM_CONSOLE
-if (!reserve_bootmem(0x4d900000, (1 << CONFIG_LOG_BUF_SHIFT), BOOTMEM_EXCLUSIVE)) {
-	ram_console_resource[0].start = 0x4d900000;
-    ram_console_resource[0].end = ram_console_resource[0].start + (1 << CONFIG_LOG_BUF_SHIFT) - 1;
-    pr_err("%s ram_console_resource[0].start: %x, end: %x\n", __func__, ram_console_resource[0].start, ram_console_resource[0].end);	
-}
-#endif
-
 	/* as soon as INFORM3 is visible, sec_debug is ready to run */
 	sec_debug_init();
 }
@@ -6804,9 +6825,15 @@ static void __init smdkc210_machine_init(void)
 				ARRAY_SIZE(i2c_devs10_emul));
 #endif
 #ifdef CONFIG_S3C_DEV_I2C11_EMUL
+#if defined (CONFIG_OPTICAL_CM3663)
 	s3c_gpio_setpull(GPIO_PS_ALS_INT, S3C_GPIO_PULL_NONE);
 	i2c_register_board_info(11, i2c_devs11_emul,
 				ARRAY_SIZE(i2c_devs11_emul));
+#endif
+#if defined (CONFIG_MACH_Q1_BD)
+	i2c_register_board_info(11, i2c_devs11_emul,
+				ARRAY_SIZE(i2c_devs11_emul));
+#endif
 #endif
 #ifdef CONFIG_S3C_DEV_I2C14_EMUL
 	nfc_setup_gpio();
