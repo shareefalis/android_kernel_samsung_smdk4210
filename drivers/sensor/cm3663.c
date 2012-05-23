@@ -68,12 +68,21 @@ static u8 reg_defaults[8] = {
 #endif
 };
 
+#if defined(CONFIG_TARGET_LOCALE_NA)
+static const int adc_table[4] = {
+	18,
+	173,
+	1737,
+	16792,
+};
+#else
 static const int adc_table[4] = {
 	15,
 	150,
 	1500,
 	15000,
 };
+#endif
 
 enum {
 	LIGHT_ENABLED = BIT(0),

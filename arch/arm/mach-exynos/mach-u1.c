@@ -5174,12 +5174,111 @@ static struct i2c_board_info i2c_devs3[] __initdata = {
 
 };
 #endif
-//#ifdef CONFIG_S3C_DEV_I2C4 || 
+//#ifdf CONFIG_S3C_DEV_I2C4
+
+static struct regulator_init_data u1_max8893_buck_data = {
+	.constraints	= {
+		.name		= "max8893_buck",
+		.min_uV		= 1200000,
+		.max_uV		= 1200000,
+		.apply_uV	= 1,
+		.valid_ops_mask	= REGULATOR_CHANGE_VOLTAGE |
+				  REGULATOR_CHANGE_STATUS,
+	},
+};
+
+static struct regulator_init_data u1_max8893_ldo1_data = {
+	.constraints	= {
+		.name		= "max8893_ldo1",
+		.min_uV		= 2800000,
+		.max_uV		= 2800000,
+		.apply_uV	= 1,
+		.valid_ops_mask	= REGULATOR_CHANGE_VOLTAGE |
+				  REGULATOR_CHANGE_STATUS,
+	},
+};
+
+static struct regulator_init_data u1_max8893_ldo2_data = {
+	.constraints	= {
+		.name		= "max8893_ldo2",
+		.min_uV		= 2800000,
+		.max_uV		= 2800000,
+		.apply_uV	= 1,
+		.valid_ops_mask	= REGULATOR_CHANGE_VOLTAGE |
+				  REGULATOR_CHANGE_STATUS,
+	},
+};
+
+static struct regulator_init_data u1_max8893_ldo3_data = {
+	.constraints	= {
+		.name		= "max8893_ldo3",
+		.min_uV		= 3300000,
+		.max_uV		= 3300000,
+		.apply_uV	= 1,
+		.valid_ops_mask	= REGULATOR_CHANGE_VOLTAGE |
+				  REGULATOR_CHANGE_STATUS,
+	},
+};
+
+static struct regulator_init_data u1_max8893_ldo4_data = {
+	.constraints	= {
+		.name		= "max8893_ldo4",
+		.min_uV		= 2900000,
+		.max_uV		= 2900000,
+		.apply_uV	= 1,
+		.valid_ops_mask	= REGULATOR_CHANGE_VOLTAGE |
+				  REGULATOR_CHANGE_STATUS,
+	},
+};
+
+static struct regulator_init_data u1_max8893_ldo5_data = {
+	.constraints	= {
+		.name		= "max8893_ldo5",
+		.min_uV		= 2800000,
+		.max_uV		= 2800000,
+		.apply_uV	= 1,
+		.valid_ops_mask	= REGULATOR_CHANGE_VOLTAGE |
+				  REGULATOR_CHANGE_STATUS,
+	},
+};
+
+static struct max8893_subdev_data u1_max8893_subdev_data[] = {
+	{
+		.id = MAX8893_BUCK,
+		.initdata = &u1_max8893_buck_data,
+	},
+	{
+		.id = MAX8893_LDO1,
+		.initdata = &u1_max8893_ldo1_data,
+	},
+	{
+		.id = MAX8893_LDO2,
+		.initdata = &u1_max8893_ldo2_data,
+	},
+	{
+		.id = MAX8893_LDO3,
+		.initdata = &u1_max8893_ldo3_data,
+	},
+	{
+		.id = MAX8893_LDO4,
+		.initdata = &u1_max8893_ldo4_data,
+	},
+	{
+		.id = MAX8893_LDO5,
+		.initdata = &u1_max8893_ldo5_data,
+	},
+};
+
+static struct max8893_platform_data u1_max8893_pdata = {
+	.num_subdevs = ARRAY_SIZE(u1_max8893_subdev_data),
+	.subdevs = u1_max8893_subdev_data,
+};
+
 static struct i2c_board_info i2c_devs4[] __initdata = {
 #if defined(CONFIG_WIMAX_CMC)
 	{
 		I2C_BOARD_INFO("max8893_wmx", 0x3E),
-		.platform_data = NULL,
+		.platform_data = &u1_max8893_pdata,
 	},
 #endif /* CONFIG_WIMAX_CMC */
 };
@@ -6825,7 +6924,7 @@ static void __init smdkc210_machine_init(void)
 				ARRAY_SIZE(i2c_devs10_emul));
 #endif
 #ifdef CONFIG_S3C_DEV_I2C11_EMUL
-#if defined (CONFIG_OPTICAL_CM3663)
+#if defined (CONFIG_SENSORS_CM3663)
 	s3c_gpio_setpull(GPIO_PS_ALS_INT, S3C_GPIO_PULL_NONE);
 	i2c_register_board_info(11, i2c_devs11_emul,
 				ARRAY_SIZE(i2c_devs11_emul));

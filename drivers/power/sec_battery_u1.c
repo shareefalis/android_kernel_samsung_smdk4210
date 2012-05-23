@@ -39,8 +39,14 @@
 #if defined(CONFIG_TARGET_LOCALE_NAATT)
 #define VF_CHECK_INTERVAL	(5 * 1000)
 
+#if defined(CONFIG_TARGET_LOCALE_NA_
+#define	MAX_VF	1500
+#define	MIN_VF	1350
+#else
 #define	MAX_VF	1800
 #define	MIN_VF	1100
+#endif
+
 #define	VF_COUNT	1
 #elif defined(CONFIG_MACH_Q1_BD)
 #define VF_CHECK_INTERVAL	(5 * 1000)
@@ -377,7 +383,7 @@ static enum power_supply_property sec_power_props[] = {
 };
 
 #ifdef CONFIG_TARGET_LOCALE_NA
-static struct sec_bat_info *pchg;
+static struct sec_bat_info *pchg = NULL;
 #endif
 
 struct power_supply *get_power_supply_by_name(char *name)

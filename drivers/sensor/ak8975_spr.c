@@ -26,7 +26,7 @@
 #include <linux/uaccess.h>
 #include <linux/delay.h>
 #include <linux/fs.h>
-#include <linux/i2c/ak8975.h>
+#include <linux/sensor/ak8975.h>
 #include <linux/completion.h>
 #include "ak8975-reg.h"
 
@@ -305,6 +305,7 @@ static int akm8975_setup_irq(struct akm8975_data *akm)
 
 	irq = gpio_to_irq(pdata->gpio_data_ready_int);
 
+
 	/* trigger high so we don't miss initial interrupt if it
 	 * is already pending
 	 */
@@ -389,6 +390,7 @@ int akm8975_probe(struct i2c_client *client,
 	init_waitqueue_head(&akm->state_wq);
 
 	return 0;
+
 
 exit_akmd_device_register_failed:
 	free_irq(akm->irq, akm);

@@ -6,6 +6,7 @@
 **
 ****************************************************************************/
 
+
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/init.h>
@@ -164,6 +165,7 @@ static u32 dump_rx_total = 0;
 #endif
 
 
+
 /* ===========================================================================
 **
 **                      L O C A L  -  V A R I A B L E S
@@ -268,6 +270,7 @@ static DECLARE_TASKLET(raw_res_ack_tasklet, res_ack_tasklet_handler, (unsigned l
 static DEFINE_MUTEX(pdp_lock);
 
 
+
 /*
 ** FUNCTION PROTOTYPEs
 */
@@ -309,6 +312,7 @@ extern int sec_debug_level(void);
 #endif    /* _ENABLE_ERROR_DEVICE */
 
 
+
 #ifndef DISABLE_IPC_DEBUG
 typedef struct {
    unsigned char start_flag;
@@ -323,6 +327,7 @@ typedef struct {
    unsigned char parameter[1024];
 } dpram_fmt_frame;
 #endif
+
 
 
 #if 1
@@ -481,9 +486,11 @@ static void setup_cp_ramdump(void)
 	DRV_Wait_ModemInit();
 }
 
+
 static void start_cp_ramdump(void)
 {
     int i, ret;
+
 
 	PRINT_FUNC();
 
@@ -536,6 +543,7 @@ static void close_cp_ramdump(void)
 	dpram_clear_response();
 }
 #endif
+
 
 
 /*
@@ -645,11 +653,13 @@ static inline int _memcmp(u8 *dest, u8 *src, int size)
 }
 
 
+
 #define WRITE_TO_DPRAM(dest, src, size) \
     _memcpy((void *)(DPRAM_VBASE + dest), src, size)
 
 #define READ_FROM_DPRAM(dest, src, size) \
     _memcpy(dest, (void *)(DPRAM_VBASE + src), size)
+
 
 
 static inline int WRITE_TO_DPRAM_VERIFY(u32 dest, void *src, int size)
@@ -734,6 +744,7 @@ static void dpram_unlock_read(const char* func)
 }
 
 
+
 #if defined(PRINT_DPRAM_WRITE) || defined(PRINT_DPRAM_READ)
 static void dpram_print_packet(const unsigned char *buf, int len)
 {
@@ -791,7 +802,7 @@ static int dpram_write(dpram_device_t *device, const unsigned char *buf, int len
     if (!access || magic != 0xAA)
     {
         LOGE("Phone has not booted yet!!! (phone_sync = %d)\n", g_phone_sync);
-        return -EFAULT;
+       // return -EFAULT;
     }
 
     if ( dpram_lock_write(__func__) < 0 )
@@ -978,6 +989,7 @@ static int dpram_read_fmt(dpram_device_t *device, const u16 non_cmd)
         WRITE_TO_DPRAM_VERIFY(device->in_tail_addr, &up_tail, sizeof(up_tail));
 #endif
     }
+
 
 
     device->in_head_saved = head;
@@ -1226,6 +1238,7 @@ static int dpram_init_magic_num(void)
 }
 
 
+
 #ifdef _ENABLE_ERROR_DEVICE
 void request_phone_reset(void)
 {
@@ -1263,6 +1276,7 @@ void request_phone_reset(void)
 #endif
 
 
+
 static void dpram_send_mbx_BA(u16 irq_mask)
 {
     if (g_dump_on)
@@ -1278,6 +1292,7 @@ static void dpram_send_mbx_BA(u16 irq_mask)
     LOG("mbx_BA = 0x%04X\n", irq_mask);
 #endif
 }
+
 
 
 /*
@@ -1336,6 +1351,7 @@ static void dpram_clear(void)
     {
         iowrite16(0, (void *)(DPRAM_VBASE + i));
     }
+
 
     local_irq_restore(flags);
 
@@ -1441,6 +1457,7 @@ static void dpram_drop_data(dpram_device_t *device)
 
     LOGA("DROP head: %d, tail: %d\n", head, tail);
 }
+
 
 
 static void dpram_phone_power_on(void)
@@ -1595,6 +1612,7 @@ static int dpram_read_proc(char *page, char **start, off_t off,
     char buf[DPRAM_ERR_MSG_LEN];
     unsigned long flags;
 #endif    /* _ENABLE_ERROR_DEVICE */
+
 
     READ_FROM_DPRAM((void *)&magic, DPRAM_MAGIC_CODE_ADDRESS, sizeof(magic));
     READ_FROM_DPRAM((void *)&enable, DPRAM_ACCESS_ENABLE_ADDRESS, sizeof(enable));
@@ -1891,6 +1909,7 @@ static int dpram_tty_ioctl(struct tty_struct *tty, unsigned int cmd, unsigned lo
 
             LOGA("IOCTL cmd = DPRAM_PHONE_CPRAMDUMP_DONE\n");
 
+
 		dpram_send_command(CMD_CP_RAMDUMP_SEND_DONE_REQ);
 	    ret = dpram_wait_response(CMD_CP_RAMDUMP_SEND_DONE_RESP|MASK_CMD_RESULT_SUCCESS);
             if (!ret) {
@@ -1922,6 +1941,7 @@ static int dpram_tty_chars_in_buffer(struct tty_struct *tty)
     int data;
     u16 head, tail;
 
+
     dpram_device_t *device = (dpram_device_t *)tty->driver_data;
     
     if (device != NULL)
@@ -1942,6 +1962,7 @@ static int dpram_err_read(struct file *filp, char *buf, size_t count, loff_t *pp
 {
     DECLARE_WAITQUEUE(wait, current);
 
+
     ssize_t ret;
     size_t ncopy;
 
@@ -1957,6 +1978,7 @@ static int dpram_err_read(struct file *filp, char *buf, size_t count, loff_t *pp
                 ret = ncopy;
 
             dpram_err_len = 0;
+
 
             break;
         }
@@ -1991,6 +2013,7 @@ static unsigned int dpram_err_poll(struct file *filp,
     poll_wait(filp, &dpram_err_wait_q, wait);
     return ((dpram_err_len) ? (POLLIN | POLLRDNORM) : 0);
 }
+
 
 static int dpram_dump_open(struct inode *inode, struct file *filp)
 {
@@ -2050,6 +2073,7 @@ static long dpram_dump_ioctl(struct file *file,
             start_cp_ramdump();
             return 0;
         }
+
 
         case DPRAM_PHONE_CPRAMDUMP_DONE:
         {
@@ -2205,6 +2229,7 @@ static void cmd_error_display_handler(void)
     wake_lock_timeout(&dpram_wake_lock, HZ*20);
 
 
+
     /* goto Upload mode : receive C9 */
     if ((sec_debug_level())&&(dpram_err_cause != UPLOAD_CAUSE_CDMA_RESET))
     {
@@ -2226,6 +2251,7 @@ static void cmd_error_display_handler(void)
 #endif
 #endif    /* _ENABLE_ERROR_DEVICE */
 }
+
 
 
 static void cmd_phone_start_handler(void)
@@ -2340,6 +2366,7 @@ static void dpram_data_handler(u16 non_cmd)
     {
         non_cmd |= INT_MASK_SEND_R;
 
+
         if (non_cmd & INT_MASK_REQ_ACK_R)
             atomic_inc(&raw_txq_req_ack_rcvd);
     }
@@ -2428,6 +2455,7 @@ static void phone_active_work_func(struct work_struct *work)
 }
 
 
+
 /* @LDK@ interrupt handlers. */
 static irqreturn_t dpram_irq_handler(int irq, void *dev_id)
 {
@@ -2500,6 +2528,7 @@ static irqreturn_t dpram_irq_handler(int irq, void *dev_id)
 }
 
 
+
 static irqreturn_t dpram_wake_from_CP_irq_handler(int irq, void *dev_id)
 {
 #ifdef DEBUG_DPRAM_INT_HANDLER
@@ -2517,12 +2546,14 @@ static irqreturn_t phone_active_irq_handler(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
+
 static irqreturn_t cp_dump_irq_handler(int irq, void *dev_id)
 {
 	//only print log
     //LOGA("CP_DUMP_INT - High\n", __func__);
     return IRQ_HANDLED;
 }
+
 
 
 static int kernel_sec_dump_cp_handle2(void)
@@ -2559,6 +2590,7 @@ static struct file_operations dpram_err_ops = {
 
     /* TODO: add more operations */
 };
+
 
 static struct file_operations dpram_dump_ops = {
     .owner  = THIS_MODULE,
@@ -2667,6 +2699,7 @@ static int register_dpram_driver(void)
     /* @LDK@ allocate tty driver */
     dpram_tty_driver = alloc_tty_driver(MAX_INDEX);
 
+
     if (!dpram_tty_driver) {
         return -ENOMEM;
     }
@@ -2762,6 +2795,7 @@ static int vs_open(struct tty_struct *tty, struct file *filp)
 {
     struct pdp_info *dev;
 
+
     dev = pdp_get_serdev(tty->driver->name); // 2.6 kernel porting
 
     if (dev == NULL) {
@@ -2779,6 +2813,7 @@ static int vs_open(struct tty_struct *tty, struct file *filp)
 static void vs_close(struct tty_struct *tty, struct file *filp)
 {
     struct pdp_info *dev;
+
 
     dev = pdp_get_serdev(tty->driver->name);
 
@@ -3228,6 +3263,7 @@ err:	return rv;
 static int dpram_shared_bank_remap(void)
 {
 
+
 //Clock Settings for Modem IF ====>FixMe
     u32 val;
     void __iomem *regs = ioremap(0x10030000, 0x10000);
@@ -3489,39 +3525,12 @@ static int dpram_suspend(struct platform_device *dev, pm_message_t state)
     */
     if (dpram_get_lock_read() == 0)
     {
-        /*
-        ** retry sending MBX_CMD_PDA_SLEEP if CP does not send in timout
-        */
-        do {
-            init_completion(&g_complete_dpramdown);
-            dpram_send_mbx_BA_cmd(INT_COMMAND(MBX_CMD_PDA_SLEEP));
-            //timeout_ret = wait_for_completion_timeout(&g_complete_dpramdown, DPRAMDOWN_TIMEOUT);
-            timeout_ret = wait_for_completion_timeout(&g_complete_dpramdown, msecs_to_jiffies(500));
-#ifdef PRINT_DPRAM_PWR_CTRL
-            LOGA("suspend_enter cnt = %d\n", (DPRAM_PDNINTR_RETRY_CNT - suspend_retry));
-#endif
-        } while ( !timeout_ret && suspend_retry-- );
-
-        in_intr = ioread16((void *)dpram_mbx_AB);
-        if (in_intr != (INT_MASK_VALID|INT_MASK_COMMAND|MBX_CMD_DPRAM_DOWN))
-        {
-            LOGE("T-I-M-E-O-U-T !!! (intr = 0x%04X)\n", in_intr);
-            g_dpram_wpend = IDPRAM_WPEND_UNLOCK; // dpram write unlock
-
-	    if (g_phone_sync == 0)
-	    {
-	    	LOGE("phone_sync: [%d] retry Phone reset and on\n", g_phone_sync);
-		dpram_phone_reset();
-		dpram_phone_power_on();
-	    }
-            return -1;
-        }
-
+	LOGA("dpram_suspend().\n");
         /*
         * Because, if dpram was powered down, cp dpram random intr was ocurred,
         * So, fixed by muxing cp dpram intr pin to GPIO output high,..
         */
-	gpio_set_value(EXYNOS4_GPE0_3_MDM_IRQn, GPIO_LEVEL_HIGH);
+		gpio_set_value(EXYNOS4_GPE0_3_MDM_IRQn, GPIO_LEVEL_HIGH);
 
         s3c_gpio_cfgpin(EXYNOS4_GPE0_0_MDM_WEn, S3C_GPIO_SFN(EXYNOS4_MDM_IF_SEL));
         s3c_gpio_cfgpin(EXYNOS4_GPE0_1_MDM_CSn, S3C_GPIO_SFN(EXYNOS4_MDM_IF_SEL));
@@ -3531,23 +3540,22 @@ static int dpram_suspend(struct platform_device *dev, pm_message_t state)
 
         gpio_set_value(GPIO_PDA_ACTIVE, GPIO_LEVEL_LOW);
 
-	flush_work(&phone_active_work.work);
+		flush_work(&phone_active_work.work);
 
-	//To configure AP_WAKE wakable interrupt
-	disable_irq(dpram_wakeup_irq);
-	enable_irq_wake(dpram_wakeup_irq);
+		//To configure AP_WAKE wakable interrupt
+		disable_irq(dpram_wakeup_irq);
+		enable_irq_wake(dpram_wakeup_irq);
     }
     else
     {
         //wake_lock_timeout(&dpram_wake_lock, HZ/4);
-        LOGA("Skip the suspned mode - read lock \n");
-	g_dpram_wpend = IDPRAM_WPEND_UNLOCK; // dpram write unlock
+        LOGA("Skip the suspend mode - read lock \n");
+		g_dpram_wpend = IDPRAM_WPEND_UNLOCK; // dpram write unlock
         return -1;
     }
 
     return 0;
 }
-
 
 static int dpram_resume(struct platform_device *dev)
 {
@@ -3607,6 +3615,7 @@ static int __devinit dpram_probe(struct platform_device *dev)
         LOGE("misc_register() failed\n");
         return -1;
     }
+
 
     multipdp_init();
 
@@ -3674,6 +3683,7 @@ static int __devexit dpram_remove(struct platform_device *dev)
     unregister_dpram_err_device();
     unregister_dpram_dump_device();
 #endif
+
 
     /* remove app. interface device */
     misc_deregister(&multipdp_dev);

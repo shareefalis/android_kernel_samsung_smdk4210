@@ -320,7 +320,7 @@ static int __devexit max8893_remove(struct i2c_client *client)
 }
 
 static const struct i2c_device_id max8893_id[] = {
-	{ "max8893", 0 },
+	{ "max8893_wmx", 0 },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, max8893_id);
@@ -329,7 +329,7 @@ static struct i2c_driver max8893_driver = {
 	.probe = max8893_probe,
 	.remove = __devexit_p(max8893_remove),
 	.driver		= {
-		.name	= "max8893",
+		.name	= "max8893_wmx",
 		.owner	= THIS_MODULE,
 	},
 	.id_table	= max8893_id,

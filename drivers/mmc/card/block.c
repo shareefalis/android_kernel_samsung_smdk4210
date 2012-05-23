@@ -49,6 +49,10 @@
 
 MODULE_ALIAS("mmc:block");
 
+#if defined(CONFIG_MACH_C1_NA_SPR_REV05)
+#define MOVI_DEBUG /* It's for debugging on Gaudi(D710) */
+#endif
+
 #ifdef MOVI_DEBUG
 struct CMD_LOG {
 	u32 cmd;

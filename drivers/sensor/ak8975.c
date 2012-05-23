@@ -27,8 +27,8 @@
 #include "ak8975-reg.h"
 #include <linux/sensor/sensors_core.h>
 
-#undef FACTORY_TEST
-#undef MAGNETIC_LOGGING
+#define FACTORY_TEST
+#define MAGNETIC_LOGGING
 
 #define AK8975_REG_CNTL			0x0A
 #define REG_CNTL_MODE_SHIFT             0
@@ -702,11 +702,9 @@ int akm8975_probe(struct i2c_client *client,
 		dev_err(&client->dev, "Error in setting power down mode\n");
 		goto exit_i2c_failed;
 	}
-//#ifdef CONFIG_MACH_U1_NA_USCC_REV05
-//	akm->dev = sensors_classdev_register("compass_sensor");
-//#else
+
 	akm->dev = sensors_classdev_register("magnetic_sensor");
-//#endif
+
 	if (IS_ERR(akm->dev)) {
 		printk(KERN_ERR "Failed to create device!");
 		goto exit_class_create_failed;

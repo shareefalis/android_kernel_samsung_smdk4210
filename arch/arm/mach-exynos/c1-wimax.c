@@ -18,7 +18,7 @@
 	}
 extern int wimax_pmic_set_voltage(void);
 
-extern int s3c_bat_use_wimax(int onoff);
+//extern int s3c_bat_use_wimax(int onoff);
 
 static struct wimax_cfg wimax_config;
 
@@ -183,7 +183,7 @@ wimax_power_on:
 	if (wimax_config.wimax_mode != SDIO_MODE) {
 	      dump_debug("Wimax power ON - !SDIO_MODE");
 		switch_usb_wimax();
-		s3c_bat_use_wimax(1);
+		//s3c_bat_use_wimax(1);
 	}
 	if (wimax_config.wimax_mode == WTM_MODE) {
 		dump_debug("Wimax power ON - !WTM_MODE");
@@ -197,7 +197,7 @@ wimax_power_on:
 	gpio_set_value(GPIO_WIMAX_EN, 1);
 	dump_debug("Wimax power ON - gpio_set_value(GPIO_WIMAX_EN, GPIO_LEVEL_HIGH)");
 	wimax_init_gpios();
-	wimax_pmic_set_voltage();
+	//wimax_pmic_set_voltage();
 	dump_debug("Wimax power ON - wimax_init_gpios()");
 	dump_debug("RESET");
 	gpio_set_value(GPIO_WIMAX_RESET_N, 0);
@@ -233,7 +233,7 @@ wimax_power_off:
 	msleep(500);
 
 	if (wimax_config.wimax_mode != SDIO_MODE) {
-		s3c_bat_use_wimax(0);
+		//s3c_bat_use_wimax(0);
 	}
 	wimax_on_pin_conf(0);
 	pr_debug("Wimax power OFF");
@@ -267,10 +267,11 @@ static struct wimax732_platform_data wimax732_pdata = {
 	.get_sleep_mode = get_wimax_sleep_mode,
 	.is_modem_awake = is_wimax_active,
 	.wakeup_assert = wimax_wakeup_assert,
-//.uart_wimax = switch_uart_wimax,
-//	.uart_ap = switch_uart_ap,
+	.uart_wimax = switch_uart_wimax,
+	.uart_ap = switch_uart_ap,
 	.restore_uart_path = restore_uart_path,
 	.g_cfg = &wimax_config,
+//	.wimax_int	= GPIO_USB_SEL, /* GPIO_USB_SEL,*/
 };
 
 struct platform_device s3c_device_cmc732 = {
@@ -333,7 +334,7 @@ void wimax_deinit_gpios(void)
 	s3c_gpio_setpull(GPIO_WIMAX_INT, S3C_GPIO_PULL_NONE);
 	gpio_set_value(GPIO_WIMAX_INT, GPIO_LEVEL_LOW);
 
-	switch_usb_ap();
+	//switch_usb_ap();
 	
 }
 

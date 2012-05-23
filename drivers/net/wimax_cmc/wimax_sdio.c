@@ -71,10 +71,7 @@ EXPORT_SYMBOL(s3c_bat_use_wimax);
 static const struct file_operations swmx_fops = {
 owner:THIS_MODULE,
 open	:	swmxdev_open,
-//release	:	swmxdev_release,
 unlocked_ioctl	:	swmxdev_ioctl,
-//read	:	swmxdev_read,
-//write	:	swmxdev_write,
 };
 
 static struct miscdevice swmxctl_dev = {
@@ -97,83 +94,6 @@ int swmxdev_open(struct inode *inode, struct file *file)
 	return 0;
 }
 
-int swmxdev_release(struct inode *inode, struct file *file)
-{
-	dump_debug("Device close by %d", current->tgid);
-	return 0;
-}
-
-/*long swmxdev_ioctl(struct file *file,
-			 u32 cmd, unsigned long arg)
-{
-	int	ret = 0;
-	u8	val = ((u8 *)arg)[0];
-
-	struct wimax732_platform_data *gpdata =
-		(struct wimax732_platform_data *)(file->private_data);
-
-	dump_debug("CMD: %x, PID: %d", cmd, current->tgid);
-
-	switch (cmd) {
-	case CONTROL_IOCTL_WIMAX_POWER_CTL: {
-			dump_debug("CONTROL_IOCTL_WIMAX_POWER_CTL..");
-		if (val == 0) {
-			pr_debug("WIMAX POWER OFF");
-			//ret = gpdata->power(0);
-		} else {
-			pr_debug("WIMAX POWER ON");
-			ret = gpdata->power(1);
-		}
-				break;
-			}
-	case CONTROL_IOCTL_WIMAX_MODE_CHANGE: {
-			dump_debug("CONTROL_IOCTL_WIMAX_MODE_CHANGE"
-					" to %d..", val);
-			if ((val < 0) || (val > AUTH_MODE)) {
-				dump_debug("Wrong mode %d", val);
-				return 0;
-				}
-				gpdata->power(0);
-				gpdata->g_cfg->wimax_mode = val;
-				msleep(500);  //for gurantee the bootloader initializing time
-				ret = gpdata->power(1);
-				break;
-			}
-	case CONTROL_IOCTL_WIMAX_EEPROM_DOWNLOAD: {
-				dump_debug("CNT_IOCTL_WIMAX_EEPROM_DOWNLOAD");
-				gpdata->power(0);
-				ret = eeprom_write_boot();
-				break;
-			}
-	case CONTROL_IOCTL_WIMAX_SLEEP_MODE: {
-			if (val == 0) {
-				dump_debug("AP SLEEP: WIMAX VI");
-				gpdata->g_cfg->sleep_mode = 0;
-			} else {
-				dump_debug("AP SLEEP: WIMAX IDLE");
-				gpdata->g_cfg->sleep_mode = 1;
-				}
-				break;
-			}
-	case CONTROL_IOCTL_WIMAX_WRITE_REV: {
-			dump_debug("CONTROL_IOCTL_WIMAX_WRITE_REV");
-			gpdata->power(0);
-			ret = eeprom_write_rev();
-			break;
-			}
-	case CONTROL_IOCTL_WIMAX_CHECK_CERT: {
-			dump_debug("CONTROL_IOCTL_WIMAX_CHECK_CERT");
-			gpdata->power(0);
-			ret = eeprom_check_cert();
-			break;
-			}
-	case CONTROL_IOCTL_WIMAX_CHECK_CAL: {
-			dump_debug("CONTROL_IOCTL_WIMAX_CHECK_CAL");
-			gpdata->power(0);
-			ret = eeprom_check_cal();
-			break;
-			}
-	}*/	/* switch (cmd) */
 long swmxdev_ioctl(struct file *file, u32 cmd,
 							unsigned long arg)
 {
@@ -214,65 +134,43 @@ long swmxdev_ioctl(struct file *file, u32 cmd,
 	return ret;
 }
 
-ssize_t swmxdev_read(struct file *file, char *buf,
-			 size_t count, loff_t *ppos)
-{
-	return 0;
-}
-
-ssize_t swmxdev_write(struct file *file, const char *buf,
-			 size_t count, loff_t *ppos)
-{
-	return 0;
-}
-
 /*
    uwibro functions
    (send and receive control packet with WiMAX modem)
  */
 int uwbrdev_open(struct inode *inode, struct file *file)
 {
-	struct net_adapter		*adapter;
-	struct process_descriptor	*process;
+	struct net_adapter	*adapter = container_of(file->private_data,
+			struct net_adapter, uwibro_dev);
+	struct process_descriptor	*procdsc;
 
-	if ((g_adapter == NULL) || g_adapter->halted) {
-		dump_debug("can't find adapter or Device Removed");
+	if ((adapter == NULL) || adapter->halted) {
+		pr_debug("can't find adapter or Device Removed");
 		return -ENODEV;
 	}
 
-	file->private_data = (void *)g_adapter;
-	adapter = (struct net_adapter *)(file->private_data);
-	dump_debug("open: tgid=%d", current->tgid);
+	file->private_data = adapter;
+	pr_debug("open: tgid=%d", current->tgid);
 
-	if (adapter->mac_ready != TRUE || adapter->halted) {
-		dump_debug("Device not ready Retry..");
+	if (!adapter->mac_ready || adapter->halted) {
+		pr_debug("Device not ready Retry..");
 		return -ENXIO;
 	}
 
-	process = process_by_id(adapter, current->tgid);
-	if (process != NULL) {
-		dump_debug("second open attemp from uid %d", current->tgid);
-		return -EEXIST;
-	} else {
-		/* init new process descriptor */
-		process = (struct process_descriptor *)
-				kmalloc(sizeof(struct process_descriptor),
-					 GFP_ATOMIC);
-		if (process == NULL) {
-			dump_debug("uwbrdev_open: kmalloc fail!!");
-			return -ENOMEM;
-		} else {
-			process->id = current->tgid;
-			process->irp = FALSE;
-			process->type = 0;
-			init_waitqueue_head(&process->read_wait);
-			spin_lock(&adapter->ctl.apps.lock);
-			queue_put_tail(adapter->ctl.apps.process_list,
-					 process->node);
-			spin_unlock(&adapter->ctl.apps.lock);
-		}
+	/* init new process descriptor */
+	procdsc = kmalloc(sizeof(*procdsc), GFP_KERNEL);
+	if (procdsc == NULL) {
+		pr_debug("uwbrdev_open: kmalloc fail!!");
+		return -ENOMEM;
 	}
 
+	procdsc->id = current->tgid;
+	procdsc->irp = false;
+	procdsc->type = 0;
+	init_waitqueue_head(&procdsc->read_wait);
+	spin_lock(&adapter->ctl.apps.lock);
+	list_add_tail(&procdsc->node, &adapter->ctl.apps.process_list);
+	spin_unlock(&adapter->ctl.apps.lock);
 	return 0;
 }
 
@@ -300,7 +198,6 @@ int uwbrdev_release(struct inode *inode, struct file *file)
 		process = process_by_id(adapter, current_tgid);
 	}
 
-	if (process != NULL) {
 		/* RELEASE READ THREAD */
 		if (process->irp) {
 			process->irp = FALSE;
@@ -309,11 +206,6 @@ int uwbrdev_release(struct inode *inode, struct file *file)
 		spin_lock(&adapter->ctl.apps.lock);
 		remove_process(adapter, current_tgid);
 		spin_unlock(&adapter->ctl.apps.lock);
-	} else {
-		/*not found */
-		dump_debug("process %d not found", current_tgid);
-		return -ESRCH;
-	}
 
 	return 0;
 }
@@ -321,10 +213,9 @@ int uwbrdev_release(struct inode *inode, struct file *file)
 static const struct file_operations uwbr_fops = {
 owner:THIS_MODULE,
 open	:	uwbrdev_open,
-//release	:	uwbrdev_release,
+release	:	uwbrdev_release,
 unlocked_ioctl	:	uwbrdev_ioctl,
 read	:	uwbrdev_read,
-//write	:	uwbrdev_write,
 };
 
 static struct miscdevice uwibro_dev = {
@@ -341,146 +232,146 @@ struct control_tx_buffer {
 
 static struct control_tx_buffer g_tx_buffer;
 
-long uwbrdev_ioctl(struct file *file, u32 cmd, unsigned long arg)
+long uwbrdev_ioctl(struct file *file, u32 cmd,
+			  unsigned long arg)
 {
 	struct net_adapter		*adapter;
-	struct process_descriptor	*process;
+	struct process_descriptor	*procdsc;
 	int				ret = 0;
+	struct eth_header *ctlhdr;
+	u8				*tx_buffer;
+	int length;
 
 	adapter = (struct net_adapter *)(file->private_data);
 
 	if ((adapter == NULL) || adapter->halted) {
-		dump_debug("%s: can't find adapter or Device Removed", __func__);
+		pr_debug("can't find adapter or Device Removed");
 		return -ENODEV;
 	}
 
-	switch (cmd) {
-	case CONTROL_IOCTL_WRITE_REQUEST: {
-			struct eth_header *ctlhdr;
-			memset(&g_tx_buffer, 0x0,
-				 sizeof(struct control_tx_buffer));
-			if ((char *)arg == NULL) {
-				dump_debug("arg == NULL: return -EFAULT");
-				return -EFAULT;
-			}
-			g_tx_buffer.length =
-				((struct control_tx_buffer *)arg)->length;
-			if (g_tx_buffer.length < WIMAX_MAX_TOTAL_SIZE) {
-				if (copy_from_user(g_tx_buffer.data,
-						 (void *)(arg+sizeof(int)),
-					 g_tx_buffer.length))
-					return -EFAULT;
-				} else
-					return -EFBIG;
-			spin_lock(&adapter->ctl.apps.lock);
-			process = process_by_id(adapter, current->tgid);
-			if (process == NULL) {
-				dump_debug("process %d not found",\
-				 current->tgid);
-				ret = -EFAULT;
-				spin_unlock(&adapter->ctl.apps.lock);
-				break;
-			}
-			ctlhdr = (struct eth_header *)g_tx_buffer.data;
-			process->type = ctlhdr->type;
-			spin_unlock(&adapter->ctl.apps.lock);
-			control_send(adapter, g_tx_buffer.data,
-					 g_tx_buffer.length);
-			break;
-			}
-	default:
-			dump_debug("uwbrdev_ioctl: "
-					"unknown ioctl cmd: 0x%x", cmd);
-			break;
-	}	/* switch (cmd) */
+	if (cmd != CONTROL_IOCTL_WRITE_REQUEST) {
+		pr_debug("uwbrdev_ioctl: unknown ioctl cmd: 0x%x", cmd);
+		return -EINVAL;
+	}
 
+	if ((char *)arg == NULL) {
+		pr_debug("arg == NULL: return -EFAULT");
+		return -EFAULT;
+	}
+
+	length = ((int *)arg)[0];
+
+	if (length >= WIMAX_MAX_TOTAL_SIZE)
+		return -EFBIG;
+
+	tx_buffer = kmalloc(length, GFP_KERNEL);
+	if (!tx_buffer) {
+		pr_err("%s: not enough memory to allocate tx_buffer\n",
+								__func__);
+		return -ENOMEM;
+	}
+
+	if (copy_from_user(tx_buffer, (void *)(arg + sizeof(int)), length)) {
+		pr_err("%s: error copying buffer from user space\n", __func__);
+		ret = -EFAULT;
+		goto err_copy;
+	}
+
+	spin_lock(&adapter->ctl.apps.lock);
+	procdsc = process_by_id(adapter, current->tgid);
+	if (procdsc == NULL) {
+		pr_debug("process %d not found", current->tgid);
+		ret = -EFAULT;
+		goto err_process;
+	}
+	ctlhdr = (struct eth_header *)tx_buffer;
+	procdsc->type = ctlhdr->type;
+
+	control_send(adapter, tx_buffer, length);
+
+err_process:
+	spin_unlock(&adapter->ctl.apps.lock);
+err_copy:
+	kfree(tx_buffer);
 	return ret;
 }
 
-ssize_t uwbrdev_read(struct file *file, char *buf, size_t count, loff_t *ppos)
+ssize_t uwbrdev_read(struct file *file, char *buf, size_t count,
+								loff_t *ppos)
 {
-	struct buffer_descriptor	*dsc;
+	struct buffer_descriptor	*bufdsc;
 	struct net_adapter		*adapter;
-	struct process_descriptor	*process;
+	struct process_descriptor	*procdsc;
 	int				rlen = 0;
 
 	adapter = (struct net_adapter *)(file->private_data);
 	if ((adapter == NULL) || adapter->halted) {
-		dump_debug("%s: can't find adapter or Device Removed", __func__);
+		pr_debug("can't find adapter or Device Removed");
 		return -ENODEV;
 	}
 
 	if (buf == NULL) {
-		dump_debug("BUFFER is NULL");
+		pr_debug("BUFFER is NULL");
 		return -EFAULT; /* bad address */
 	}
 
-	process = process_by_id(adapter, current->tgid);
-	if (process == NULL) {
-		dump_debug("uwbrdev_read: "
-				"process %d not exist", current->tgid);
+	procdsc = process_by_id(adapter, current->tgid);
+	if (procdsc == NULL) {
+		pr_debug("uwbrdev_read: process %d not exist", current->tgid);
 		return -ESRCH;
 	}
 
-	if (process->irp == FALSE) {
-		dsc = buffer_by_type(adapter->ctl.q_received.head,
-					 process->type);
-		if (dsc == NULL) {
-			process->irp = TRUE;
-			if (wait_event_interruptible(process->read_wait,
-				((process->irp == FALSE) ||
-				 (adapter->halted == TRUE)))) {
-				process->irp = FALSE;
-				adapter->pdata->g_cfg->temp_tgid =
-						 current->tgid;
-				return -ERESTARTSYS;
-			}
-			if (adapter->halted == TRUE) {
-				dump_debug("uwbrdev_read: "
-						"Card Removed "
-						"Indicated to Appln...");
-				process->irp = FALSE;
-				adapter->pdata->g_cfg->temp_tgid =
-							 current->tgid;
-				return -ENODEV;
-			}
-		}
-
-		if (count == 1500) {	/* app passes read count as 1500 */
-			spin_lock(&adapter->ctl.apps.lock);
-			dsc = buffer_by_type(adapter->ctl.q_received.head,
-						 process->type);
-			if (!dsc) {
-				dump_debug("uwbrdev_read: Fail...node is null");
-				spin_unlock(&adapter->ctl.apps.lock);
-				return -1;
-			}
-			spin_unlock(&adapter->ctl.apps.lock);
-
-			if (copy_to_user(buf, dsc->buffer, dsc->length)) {
-				dump_debug("uwbrdev_read:copy_to_user failed"
-						"len=%lu !!", dsc->length);
-				return -EFAULT;
-			}
-
-			spin_lock(&adapter->ctl.apps.lock);
-			rlen = dsc->length;
-			hw_return_packet(adapter, dsc->type);
-			spin_unlock(&adapter->ctl.apps.lock);
-		}
-	} else {
-		dump_debug("uwbrdev_read: Read was sent twice "
-					"by process %d", current->tgid);
+	if (procdsc->irp == true) {
+		pr_warn("%s: Read was sent twice by process %d\n", __func__,
+								current->tgid);
 		return -EEXIST;
 	}
 
-	return rlen;
-}
+	bufdsc = buffer_by_type(adapter->ctl.q_received.head,
+					 procdsc->type);
+	if (bufdsc == NULL) {
+		procdsc->irp = true;
+		if (wait_event_interruptible(procdsc->read_wait,
+				((procdsc->irp == false) ||
+				(adapter->halted == true)))) {
+			procdsc->irp = false;
+			adapter->pdata->g_cfg->temp_tgid = current->tgid;
+			return -ERESTARTSYS;
+		}
+		if (adapter->halted) {
+			pr_debug("uwbrdev_read: Card Removed"
+					"Indicated to Appln...");
+			procdsc->irp = false;
+			adapter->pdata->g_cfg->temp_tgid = current->tgid;
+			return -ENODEV;
+		}
+	}
 
-ssize_t uwbrdev_write(struct file *file, const char *buf,
-			 size_t count, loff_t *ppos)
-{
-	return 0;
+	if (count == 1500) {	/* app passes read count as 1500 */
+		spin_lock(&adapter->ctl.apps.lock);
+		bufdsc = buffer_by_type(adapter->ctl.q_received.head, procdsc->type);
+		if (!bufdsc) {
+			pr_debug("uwbrdev_read: Fail...node is null");
+			spin_unlock(&adapter->ctl.apps.lock);
+			return -1;
+		}
+		spin_unlock(&adapter->ctl.apps.lock);
+
+		if (copy_to_user(buf, bufdsc->buffer, bufdsc->length)) {
+			pr_debug("uwbrdev_read: copy_to_user	\
+				failed  !!");
+			return -EFAULT;
+		}
+
+		spin_lock(&adapter->ctl.apps.lock);
+		rlen = bufdsc->length;
+		list_del(&bufdsc->node);
+		kfree(bufdsc->buffer);
+		kfree(bufdsc);
+		spin_unlock(&adapter->ctl.apps.lock);
+	}
+
+	return rlen;
 }
 
 static struct net_device_ops wimax_net_ops = {

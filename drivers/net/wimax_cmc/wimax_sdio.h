@@ -36,6 +36,7 @@ struct net_adapter {
 	struct sdio_func		*func;
 	struct net_device		*net;
 	struct net_device_stats		netstats;
+	struct miscdevice		 uwibro_dev;
 
 	struct work_struct		transmit_work;
 	struct work_struct		receive_work;
