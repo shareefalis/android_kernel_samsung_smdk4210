@@ -10,7 +10,10 @@
  * 2009.03 - Currently managed by  SungHwan.yun <sunghwan.yun@samsung.com> @LDK@
  *
  */
+<<<<<<< HEAD
 #include <linux/smp_lock.h>
+=======
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 #include <linux/time.h>
 #include <linux/highuid.h>
 #include <linux/pagemap.h>
@@ -20,6 +23,10 @@
 #include <linux/buffer_head.h>
 #include <linux/mpage.h>
 #include <linux/slab.h>
+<<<<<<< HEAD
+=======
+#include <linux/semaphore.h>
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 #include "j4fs.h"
 
 #if defined(J4FS_USE_XSR)
@@ -63,20 +70,34 @@ extern int j4fs_panic;
 
 void j4fs_GrossLock(void)
 {
+<<<<<<< HEAD
 	T(J4FS_TRACE_LOCK, ("j4fs locking %p\n", current));
 	down(&device_info.grossLock);
 	T(J4FS_TRACE_LOCK, ("j4fs locked %p\n", current));
+=======
+	J4FS_T(J4FS_TRACE_LOCK, ("j4fs locking %p\n", current));
+	down(&device_info.grossLock);
+	J4FS_T(J4FS_TRACE_LOCK, ("j4fs locked %p\n", current));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 }
 
 void j4fs_GrossUnlock(void)
 {
+<<<<<<< HEAD
 	T(J4FS_TRACE_LOCK, ("j4fs unlocking %p\n", current));
+=======
+	J4FS_T(J4FS_TRACE_LOCK, ("j4fs unlocking %p\n", current));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 	up(&device_info.grossLock);
 }
 
 int j4fs_readpage(struct file *f, struct page *page)
 {
+<<<<<<< HEAD
 	T(J4FS_TRACE_FS_READ,("%s %d\n",__FUNCTION__,__LINE__));
+=======
+	J4FS_T(J4FS_TRACE_FS_READ,("%s %d\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 	return j4fs_readpage_unlock(f, page);
 }
 
@@ -96,7 +117,11 @@ int j4fs_readpage_nolock(struct file *f, struct page *page)
 	struct inode *inode;
 	j4fs_ctrl ctl;
 
+<<<<<<< HEAD
 	T(J4FS_TRACE_FS_READ,("%s %d\n",__FUNCTION__,__LINE__));
+=======
+	J4FS_T(J4FS_TRACE_FS_READ,("%s %d\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 
 	BUG_ON(!PageLocked(page));
 
@@ -149,11 +174,19 @@ int j4fs_writepage(struct page *page, struct writeback_control *wbc)
 	int nErr;
 
 	if(j4fs_panic==1) {
+<<<<<<< HEAD
 		T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
 		return -ENOSPC;
 	}
 
 	T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+=======
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
+		return -ENOSPC;
+	}
+
+	J4FS_T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 
 	if (!mapping) BUG();
 
@@ -162,11 +195,19 @@ int j4fs_writepage(struct page *page, struct writeback_control *wbc)
 	if (!inode) BUG();
 
 	if (offset > inode->i_size) {
+<<<<<<< HEAD
 		T(J4FS_TRACE_FS,
 			("j4fs_writepage at %08x, inode size = %08x!!!\n",
 			(unsigned)(page->index << PAGE_CACHE_SHIFT),
 			(unsigned)inode->i_size));
 		T(J4FS_TRACE_FS,
+=======
+		J4FS_T(J4FS_TRACE_FS,
+			("j4fs_writepage at %08x, inode size = %08x!!!\n",
+			(unsigned)(page->index << PAGE_CACHE_SHIFT),
+			(unsigned)inode->i_size));
+		J4FS_T(J4FS_TRACE_FS,
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 			("                -> don't care!!\n"));
 		unlock_page(page);
 		return 0;
@@ -186,7 +227,11 @@ int j4fs_writepage(struct page *page, struct writeback_control *wbc)
 
 	j4fs_GrossLock();
 
+<<<<<<< HEAD
 	T(J4FS_TRACE_FS,
+=======
+	J4FS_T(J4FS_TRACE_FS,
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 		("j4fs_writepage: index=%08x,nBytes=%08x,inode.i_size=%05x\n", (unsigned)(page->index << PAGE_CACHE_SHIFT), nBytes,(int)inode->i_size));
 
 	// write file
@@ -199,7 +244,11 @@ int j4fs_writepage(struct page *page, struct writeback_control *wbc)
 
 	if(nErr==J4FS_RETRY_WRITE) nErr=fsd_write(&ctl);
 
+<<<<<<< HEAD
 	T(J4FS_TRACE_FS,
+=======
+	J4FS_T(J4FS_TRACE_FS,
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 		("j4fs_writepage: index=%08x,nBytes=%08x,inode.i_size=%05x\n", (unsigned)(page->index << PAGE_CACHE_SHIFT), nBytes,(int)inode->i_size));
 
 	j4fs_GrossUnlock();
@@ -227,6 +276,7 @@ int j4fs_write_begin(struct file *filp, struct address_space *mapping,
 	int space_held = 0;
 
 	if(j4fs_panic==1) {
+<<<<<<< HEAD
 		T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
 		return -ENOSPC;
 	}
@@ -235,6 +285,16 @@ int j4fs_write_begin(struct file *filp, struct address_space *mapping,
 
 	if(to>PAGE_CACHE_SIZE) {
 		T(J4FS_TRACE_ALWAYS,("%s %d: page size overflow(pos,index,offset,len,to)=(%d,%d,%d,%d,%d)\n",__FUNCTION__,__LINE__,pos,index,offset,len,to));
+=======
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
+		return -ENOSPC;
+	}
+
+	J4FS_T(J4FS_TRACE_FS, ("start j4fs_write_begin\n"));
+
+	if(to>PAGE_CACHE_SIZE) {
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: page size overflow(pos,index,offset,len,to)=(%lld,%lu,%u,%d,%d)\n",__FUNCTION__,__LINE__,pos,index,offset,len,to));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 		j4fs_panic("page size overflow");
 		return -ENOSPC;
 	}
@@ -268,12 +328,20 @@ int j4fs_write_begin(struct file *filp, struct address_space *mapping,
 		goto out;
 
 	/* Happy path return */
+<<<<<<< HEAD
 	T(J4FS_TRACE_FS, ("end j4fs_write_begin - ok\n"));
+=======
+	J4FS_T(J4FS_TRACE_FS, ("end j4fs_write_begin - ok\n"));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 
 	return 0;
 
 out:
+<<<<<<< HEAD
 	T(J4FS_TRACE_FS, ("end j4fs_write_begin fail returning %d\n", ret));
+=======
+	J4FS_T(J4FS_TRACE_FS, ("end j4fs_write_begin fail returning %d\n", ret));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 
 	if (pg) {
 		unlock_page(pg);
@@ -288,6 +356,7 @@ int j4fs_prepare_write(struct file *f, struct page *pg,
 				unsigned offset, unsigned to)
 {
 	if(j4fs_panic==1) {
+<<<<<<< HEAD
 		T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
 		return -ENOSPC;
 	}
@@ -296,6 +365,16 @@ int j4fs_prepare_write(struct file *f, struct page *pg,
 
 	if(to>PAGE_CACHE_SIZE) {
 		T(J4FS_TRACE_ALWAYS,("%s %d: page size overflow(offset,to)=(%d,%d)\n",__FUNCTION__,__LINE__,offset,to));
+=======
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
+		return -ENOSPC;
+	}
+
+	J4FS_T(J4FS_TRACE_FS, ("\nj4fs_prepare_write\n"));
+
+	if(to>PAGE_CACHE_SIZE) {
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: page size overflow(offset,to)=(%d,%d)\n",__FUNCTION__,__LINE__,offset,to));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 		j4fs_panic("page size overflow");
 		return -ENOSPC;
 	}
@@ -316,12 +395,20 @@ int j4fs_write_end(struct file *filp, struct address_space *mapping,
 	uint32_t offset_into_page = pos & (PAGE_CACHE_SIZE - 1);
 
 	if(j4fs_panic==1) {
+<<<<<<< HEAD
 		T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
+=======
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 		return -ENOSPC;
 	}
 
 	if(offset_into_page+copied > PAGE_CACHE_SIZE) {
+<<<<<<< HEAD
 		T(J4FS_TRACE_ALWAYS,("%s %d: page size overflow(offset_into_page,copied)=(%d,%d)\n",__FUNCTION__,__LINE__,offset_into_page, copied));
+=======
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: page size overflow(offset_into_page,copied)=(%d,%d)\n",__FUNCTION__,__LINE__,offset_into_page, copied));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 		j4fs_panic("page size overflow");
 		return -ENOSPC;
 	}
@@ -329,7 +416,11 @@ int j4fs_write_end(struct file *filp, struct address_space *mapping,
 	kva = kmap(pg);
 	addr = kva + offset_into_page;
 
+<<<<<<< HEAD
 	T(J4FS_TRACE_FS,
+=======
+	J4FS_T(J4FS_TRACE_FS,
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 		("j4fs_write_end addr %x pos %x nBytes %d\n",
 		(unsigned) addr,
 		(int)pos, copied));
@@ -337,7 +428,11 @@ int j4fs_write_end(struct file *filp, struct address_space *mapping,
 	ret = j4fs_file_write(filp, addr, copied, &pos);
 
 	if (ret != copied) {
+<<<<<<< HEAD
 		T(J4FS_TRACE_ALWAYS, ("j4fs_write_end not same size ret %d  copied %d\n", ret, copied));
+=======
+		J4FS_T(J4FS_TRACE_ALWAYS, ("j4fs_write_end not same size ret %d  copied %d\n", ret, copied));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 		SetPageError(pg);
 		ClearPageUptodate(pg);
 	} else {
@@ -364,12 +459,20 @@ int j4fs_commit_write(struct file *f, struct page *pg, unsigned offset, unsigned
 	unsigned saddr;
 
 	if(j4fs_panic==1) {
+<<<<<<< HEAD
 		T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
+=======
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 		return -ENOSPC;
 	}
 
 	if(offset+nBytes > PAGE_CACHE_SIZE) {
+<<<<<<< HEAD
 		T(J4FS_TRACE_ALWAYS,("%s %d: page size overflow(offset,nBytes)=(%d,%d)\n",__FUNCTION__,__LINE__, offset, nBytes));
+=======
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: page size overflow(offset,nBytes)=(%d,%d)\n",__FUNCTION__,__LINE__, offset, nBytes));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 		j4fs_panic("page size overflow");
 		return -ENOSPC;
 	}
@@ -379,12 +482,20 @@ int j4fs_commit_write(struct file *f, struct page *pg, unsigned offset, unsigned
 
 	saddr = (unsigned) addr;
 
+<<<<<<< HEAD
 	T(J4FS_TRACE_FS, ("j4fs_commit_write: (addr,pos,nBytes)=(0x%x, 0x%x, 0x%x)\n", saddr, spos, nBytes));
+=======
+	J4FS_T(J4FS_TRACE_FS, ("j4fs_commit_write: (addr,pos,nBytes)=(0x%x, 0x%x, 0x%x)\n", saddr, spos, nBytes));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 
 	nWritten = j4fs_file_write(f, addr, nBytes, &pos);
 
 	if (nWritten != nBytes) {
+<<<<<<< HEAD
 		T(J4FS_TRACE_ALWAYS, ("j4fs_commit_write: (nWritten,nBytes)=(0x%x 0x%x)\n", nWritten, nBytes));
+=======
+		J4FS_T(J4FS_TRACE_ALWAYS, ("j4fs_commit_write: (nWritten,nBytes)=(0x%x 0x%x)\n", nWritten, nBytes));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 		SetPageError(pg);
 		ClearPageUptodate(pg);
 	} else {
@@ -404,7 +515,11 @@ int j4fs_file_write(struct file *f, const char *buf, size_t n, loff_t *pos)
 	j4fs_ctrl ctl;
 
 	if(j4fs_panic==1) {
+<<<<<<< HEAD
 		T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
+=======
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 		return -ENOSPC;
 	}
 
@@ -417,7 +532,11 @@ int j4fs_file_write(struct file *f, const char *buf, size_t n, loff_t *pos)
 	else
 		ipos = *pos;
 
+<<<<<<< HEAD
 	T(J4FS_TRACE_FS,("j4fs_file_write: %zu bytes to ino %ld at %d\n", n, inode->i_ino, ipos));
+=======
+	J4FS_T(J4FS_TRACE_FS,("j4fs_file_write: %zu bytes to ino %ld at %d\n", n, inode->i_ino, ipos));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 
 	// write file
 	ctl.buffer=(BYTE *)buf;
@@ -431,7 +550,11 @@ int j4fs_file_write(struct file *f, const char *buf, size_t n, loff_t *pos)
 
 	if(nWritten==J4FS_RETRY_WRITE || error(nWritten))
 	{
+<<<<<<< HEAD
 		T(J4FS_TRACE_ALWAYS,("%s %d: Error(nWritten=0x%x)\n",__FUNCTION__,__LINE__,nWritten));
+=======
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: Error(nWritten=0x%x)\n",__FUNCTION__,__LINE__,nWritten));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 		j4fs_GrossUnlock();
 		return -ENOSPC;
 	}
@@ -456,12 +579,20 @@ struct j4fs_inode *j4fs_get_inode(struct super_block *sb, ino_t ino)
 	int nErr;
 	BYTE *buf;
 
+<<<<<<< HEAD
 	T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+=======
+	J4FS_T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 
 	buf=kmalloc(J4FS_BASIC_UNIT_SIZE,GFP_NOFS);
 
 	if(j4fs_panic==1) {
+<<<<<<< HEAD
 		T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
+=======
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 		goto error1;
 	}
 
@@ -478,7 +609,11 @@ struct j4fs_inode *j4fs_get_inode(struct super_block *sb, ino_t ino)
 
 		nErr = FlashDevRead(&device_info, cur_link, J4FS_BASIC_UNIT_SIZE, buf);
 		if (nErr != 0) {
+<<<<<<< HEAD
 			T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+=======
+			J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 	   		goto error1;
 		}
 
@@ -511,7 +646,11 @@ struct j4fs_inode *j4fs_get_inode(struct super_block *sb, ino_t ino)
 	{
 		nErr = FlashDevRead(&device_info, latest_matching_offset, J4FS_BASIC_UNIT_SIZE, buf);
 		if (nErr != 0) {
+<<<<<<< HEAD
 			T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+=======
+			J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 	   		goto error1;
 		}
 
@@ -520,7 +659,11 @@ struct j4fs_inode *j4fs_get_inode(struct super_block *sb, ino_t ino)
 	}
 
 Einval:
+<<<<<<< HEAD
 	T(J4FS_TRACE_ALWAYS,("%s %d: error(bad inode number: %lu)\n",__FUNCTION__,__LINE__,(unsigned long) ino));
+=======
+	J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: error(bad inode number: %lu)\n",__FUNCTION__,__LINE__,(unsigned long) ino));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 	kfree(buf);
 	return ERR_PTR(-EINVAL);
 
@@ -537,11 +680,19 @@ void j4fs_read_inode (struct inode * inode)
 	struct j4fs_inode * raw_inode;
 
 	if(j4fs_panic==1) {
+<<<<<<< HEAD
 		T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
 		return;
 	}
 
 	T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+=======
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
+		return;
+	}
+
+	J4FS_T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 
 	// root inode
 	if(ino==J4FS_ROOT_INO)
@@ -618,11 +769,19 @@ ino_t j4fs_inode_by_name(struct inode * dir, struct dentry *dentry)
 	BYTE *buf;
 
 	if(j4fs_panic==1) {
+<<<<<<< HEAD
 		T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
 		return 0;
 	}
 
 	T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+=======
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
+		return 0;
+	}
+
+	J4FS_T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 
 	buf=kmalloc(J4FS_BASIC_UNIT_SIZE,GFP_NOFS);
 
@@ -634,7 +793,11 @@ ino_t j4fs_inode_by_name(struct inode * dir, struct dentry *dentry)
 
 		nErr = FlashDevRead(&device_info, cur_link, J4FS_BASIC_UNIT_SIZE, buf);
 		if (nErr != 0) {
+<<<<<<< HEAD
 			T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+=======
+			J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 	   		goto error1;
 		}
 
@@ -675,6 +838,10 @@ error1:
 
 }
 
+<<<<<<< HEAD
+=======
+DWORD valid_offset[128][2];
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 int j4fs_readdir (struct file * filp, void * dirent, filldir_t filldir)
 {
 	unsigned int curoffs, offset, cur_link;
@@ -683,6 +850,7 @@ int j4fs_readdir (struct file * filp, void * dirent, filldir_t filldir)
 	struct j4fs_inode *raw_inode;
 	int i,j, nErr;
 	BYTE *buf;
+<<<<<<< HEAD
 	DWORD valid_offset[128][2];
 	int count=0;
 
@@ -692,6 +860,16 @@ int j4fs_readdir (struct file * filp, void * dirent, filldir_t filldir)
 	}
 
 	T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+=======
+	int count=0;
+
+	if(j4fs_panic==1) {
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
+		return 0;
+	}
+
+	J4FS_T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 
 	buf=kmalloc(J4FS_BASIC_UNIT_SIZE,GFP_NOFS);
 
@@ -702,7 +880,11 @@ int j4fs_readdir (struct file * filp, void * dirent, filldir_t filldir)
 	if (offset == 0) {
 		nErr=filldir(dirent, ".", 1, offset, filp->f_dentry->d_inode->i_ino, DT_DIR);
 		if (nErr != 0) {
+<<<<<<< HEAD
 			T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+=======
+			J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 	   		goto error1;
 		}
 		offset++;
@@ -712,7 +894,11 @@ int j4fs_readdir (struct file * filp, void * dirent, filldir_t filldir)
 	if (offset == 1) {
 		nErr=filldir(dirent, "..", 2, offset,filp->f_dentry->d_parent->d_inode->i_ino, DT_DIR);
 		if (nErr != 0) {
+<<<<<<< HEAD
 			T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+=======
+			J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 	   		goto error1;
 		}
 		offset++;
@@ -729,7 +915,11 @@ int j4fs_readdir (struct file * filp, void * dirent, filldir_t filldir)
 
 		nErr = FlashDevRead(&device_info, cur_link, J4FS_BASIC_UNIT_SIZE, buf);
 		if (nErr != 0) {
+<<<<<<< HEAD
 			T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+=======
+			J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 	   		goto error1;
 		}
 
@@ -777,7 +967,11 @@ int j4fs_readdir (struct file * filp, void * dirent, filldir_t filldir)
 			{
 				nErr = FlashDevRead(&device_info, valid_offset[i][1], J4FS_BASIC_UNIT_SIZE, buf);
 				if (nErr != 0) {
+<<<<<<< HEAD
 					T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+=======
+					J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 			   		goto error1;
 				}
 
@@ -786,12 +980,20 @@ int j4fs_readdir (struct file * filp, void * dirent, filldir_t filldir)
 				nErr=filldir(dirent, raw_inode->i_filename, strlen(raw_inode->i_filename), offset, raw_inode->i_id, DT_REG);
 
 				if(nErr <0) {
+<<<<<<< HEAD
 					T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%08x,filename=%s, file length=%d)\n",__FUNCTION__,__LINE__,nErr,raw_inode->i_filename, strlen(raw_inode->i_filename)));
+=======
+					J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%08x,filename=%s, file length=%d)\n",__FUNCTION__,__LINE__,nErr,raw_inode->i_filename, strlen(raw_inode->i_filename)));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 					goto error1;
 				}
 				else
 				{
+<<<<<<< HEAD
 					T(J4FS_TRACE_FS,("%s %d: success(filename=%s, file length=%d)\n",__FUNCTION__,__LINE__,raw_inode->i_filename, strlen(raw_inode->i_filename)));
+=======
+					J4FS_T(J4FS_TRACE_FS,("%s %d: success(filename=%s, file length=%d)\n",__FUNCTION__,__LINE__,raw_inode->i_filename, strlen(raw_inode->i_filename)));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 					offset++;
 					filp->f_pos++;
 				}
@@ -839,7 +1041,11 @@ struct dentry *j4fs_lookup(struct inode * dir, struct dentry *dentry, struct nam
 	struct inode * inode;
 	ino_t ino;
 
+<<<<<<< HEAD
 	T(J4FS_TRACE_FS,("%s %d:(filename=%s)\n",__FUNCTION__,__LINE__,dentry->d_name.name));
+=======
+	J4FS_T(J4FS_TRACE_FS,("%s %d:(filename=%s)\n",__FUNCTION__,__LINE__,dentry->d_name.name));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 
 	if (dentry->d_name.len > J4FS_NAME_LEN)
 		return ERR_PTR(-ENAMETOOLONG);
@@ -874,11 +1080,19 @@ struct inode *j4fs_new_inode(struct inode *dir, struct dentry *dentry, int mode)
 #endif
 
 	if(j4fs_panic==1) {
+<<<<<<< HEAD
 		T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
 		return NULL;
 	}
 
 	T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+=======
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
+		return NULL;
+	}
+
+	J4FS_T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 
 	// allocate new inode
 	sb = dir->i_sb;
@@ -897,7 +1111,11 @@ struct inode *j4fs_new_inode(struct inode *dir, struct dentry *dentry, int mode)
 
 	if(is_invalid_j4fs_rw_start())
 	{
+<<<<<<< HEAD
 		T(J4FS_TRACE_ALWAYS,("%s %d: Error! j4fs_rw_start is invalid(j4fs_rw_start=0x%08x, j4fs_end=0x%08x, ro_j4fs_header_count=0x%08x)\n",
+=======
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: Error! j4fs_rw_start is invalid(j4fs_rw_start=0x%08x, j4fs_end=0x%08x, ro_j4fs_header_count=0x%08x)\n",
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 			__FUNCTION__, __LINE__, j4fs_rw_start, device_info.j4fs_end, ro_j4fs_header_count));
 		j4fs_panic("j4fs_rw_start is invalid");
 		goto error1;
@@ -914,7 +1132,11 @@ struct inode *j4fs_new_inode(struct inode *dir, struct dentry *dentry, int mode)
 		// read j4fs_header
 		nErr = FlashDevRead(&device_info, offset, J4FS_BASIC_UNIT_SIZE, buf);
 		if (nErr != 0) {
+<<<<<<< HEAD
 			T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+=======
+			J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 	   		goto error1;
 		}
 
@@ -964,7 +1186,11 @@ struct inode *j4fs_new_inode(struct inode *dir, struct dentry *dentry, int mode)
 
 	if(last_object_offset!=0xffffffff)
 	{
+<<<<<<< HEAD
 		T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+=======
+		J4FS_T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 		new_object_offset=last_object_offset;
 		new_object_offset+=J4FS_BASIC_UNIT_SIZE;	// j4fs_header
 		new_object_offset+=raw_inode->i_length;	// data
@@ -978,7 +1204,11 @@ struct inode *j4fs_new_inode(struct inode *dir, struct dentry *dentry, int mode)
 
 	if((new_object_offset+J4FS_BASIC_UNIT_SIZE-1)>device_info.j4fs_end)
 	{
+<<<<<<< HEAD
 		T(J4FS_TRACE_ALWAYS,("%s %d: partition size overflow(new_object_offset=0x%08x, j4fs_end=0x%08x)\n",__FUNCTION__,__LINE__,new_object_offset,device_info.j4fs_end));
+=======
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: partition size overflow(new_object_offset=0x%08x, j4fs_end=0x%08x)\n",__FUNCTION__,__LINE__,new_object_offset,device_info.j4fs_end));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 		goto error1;
 	}
 
@@ -998,7 +1228,11 @@ struct inode *j4fs_new_inode(struct inode *dir, struct dentry *dentry, int mode)
 	nErr = FlashDevWrite(&device_info, j4fs_transaction_next_offset, J4FS_TRANSACTION_SIZE, (BYTE *)transaction);
 
 	if (error(nErr)) {
+<<<<<<< HEAD
 		T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+=======
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
    		goto error1;
 	}
 
@@ -1007,7 +1241,11 @@ struct inode *j4fs_new_inode(struct inode *dir, struct dentry *dentry, int mode)
 #endif
 
 	// add new object(j4fs_header)
+<<<<<<< HEAD
 	T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+=======
+	J4FS_T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 	memset(buf, 0xff, J4FS_BASIC_UNIT_SIZE);
 	raw_inode = (struct j4fs_inode *)buf;
 	raw_inode->i_link=0xffffffff;
@@ -1020,17 +1258,28 @@ struct inode *j4fs_new_inode(struct inode *dir, struct dentry *dentry, int mode)
 
 	nErr = FlashDevWrite(&device_info, new_object_offset, J4FS_BASIC_UNIT_SIZE, buf);
 	if (nErr != 0) {
+<<<<<<< HEAD
 		T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+=======
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
    		goto error1;
 	}
 
 	// update last_inode
 	if(last_object_offset!=0xffffffff)
 	{
+<<<<<<< HEAD
 		T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
 		nErr = FlashDevRead(&device_info, last_object_offset, J4FS_BASIC_UNIT_SIZE, buf);
 		if (nErr != 0) {
 			T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+=======
+		J4FS_T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+		nErr = FlashDevRead(&device_info, last_object_offset, J4FS_BASIC_UNIT_SIZE, buf);
+		if (nErr != 0) {
+			J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 	   		goto error1;
 		}
 
@@ -1053,7 +1302,11 @@ struct inode *j4fs_new_inode(struct inode *dir, struct dentry *dentry, int mode)
 		nErr = FlashDevWrite(&device_info, j4fs_transaction_next_offset, J4FS_TRANSACTION_SIZE, (BYTE *)transaction);
 
 		if (error(nErr)) {
+<<<<<<< HEAD
 			T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+=======
+			J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 	   		goto error1;
 		}
 
@@ -1065,7 +1318,11 @@ struct inode *j4fs_new_inode(struct inode *dir, struct dentry *dentry, int mode)
 
 		nErr = FlashDevWrite(&device_info, last_object_offset, J4FS_BASIC_UNIT_SIZE, buf);
 		if (nErr != 0) {
+<<<<<<< HEAD
 			T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+=======
+			J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 	   		goto error1;
 		}
 	}
@@ -1089,7 +1346,11 @@ int j4fs_add_link (struct dentry *dentry, struct inode *inode)
 {
 	// write j4fs_header
 	// TODO
+<<<<<<< HEAD
 	T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+=======
+	J4FS_T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 
 	return 0;
 
@@ -1099,7 +1360,11 @@ int j4fs_add_nondir(struct dentry *dentry, struct inode *inode)
 {
 	int err;
 
+<<<<<<< HEAD
 	T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+=======
+	J4FS_T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 
 	err= j4fs_add_link(dentry, inode);
 	if (!err) {
@@ -1126,11 +1391,19 @@ int j4fs_create (struct inode * dir, struct dentry * dentry, int mode, struct na
 	int err=-1;
 
 	if(j4fs_panic==1) {
+<<<<<<< HEAD
 		T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
 		return err;
 	}
 
 	T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+=======
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
+		return err;
+	}
+
+	J4FS_T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 
 	inode = j4fs_new_inode(dir, dentry, mode);
 
@@ -1157,7 +1430,11 @@ int j4fs_hold_space(int size)
 	BYTE *buf;
 
 	if(j4fs_panic==1) {
+<<<<<<< HEAD
 		T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
+=======
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: j4fs panic\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 		return 0;
 	}
 
@@ -1173,7 +1450,11 @@ int j4fs_hold_space(int size)
 		// read j4fs_header
 		nErr = FlashDevRead(&device_info, offset, J4FS_BASIC_UNIT_SIZE, buf);
 		if (nErr != 0) {
+<<<<<<< HEAD
 			T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+=======
+			J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: error(nErr=0x%x)\n",__FUNCTION__,__LINE__,nErr));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 	   		goto error1;
 		}
 
@@ -1200,7 +1481,11 @@ int j4fs_hold_space(int size)
 
 	if(last_object_offset!=0xffffffff)
 	{
+<<<<<<< HEAD
 		T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+=======
+		J4FS_T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 		new_object_offset=last_object_offset;
 		new_object_offset+=J4FS_BASIC_UNIT_SIZE;	// j4fs_header
 		new_object_offset+=raw_inode->i_length;	// data
@@ -1221,9 +1506,15 @@ int j4fs_fill_super(struct super_block *sb, void *data, int silent)
 	struct j4fs_sb_info * sbi;
 	struct j4fs_super_block * es;
 	struct inode *root;
+<<<<<<< HEAD
 	u32 tmp, len,ret;
 
 	T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+=======
+	u32 ret;
+
+	J4FS_T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 
 	sbi = kzalloc(sizeof(*sbi), GFP_NOFS);
 	if (!sbi)
@@ -1266,7 +1557,11 @@ int j4fs_fill_super(struct super_block *sb, void *data, int silent)
 
 #if defined(J4FS_USE_XSR) || defined(J4FS_USE_FSR)
 	if (ret) {
+<<<<<<< HEAD
 		T(J4FS_TRACE_ALWAYS,("%s %d: Error(0x%08x)\n",__FUNCTION__,__LINE__,ret));
+=======
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: Error(0x%08x)\n",__FUNCTION__,__LINE__,ret));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 		return -EINVAL;
 	}
 
@@ -1284,6 +1579,7 @@ int j4fs_fill_super(struct super_block *sb, void *data, int silent)
 #endif
 // J4FS for moviNAND merged from ROSSI
 
+<<<<<<< HEAD
 	T(J4FS_TRACE_FS,("%s %d: device_info.j4fs_end=0x%08x, device_info.j4fs_device_end=0x%08x\n",__FUNCTION__,__LINE__,device_info.j4fs_end,device_info.j4fs_device_end));
 
 	if (!sb->s_root) {
@@ -1293,22 +1589,45 @@ int j4fs_fill_super(struct super_block *sb, void *data, int silent)
 	}
 
 	init_MUTEX(&device_info.grossLock);
+=======
+	J4FS_T(J4FS_TRACE_FS,("%s %d: device_info.j4fs_end=0x%08x, device_info.j4fs_device_end=0x%08x\n",__FUNCTION__,__LINE__,device_info.j4fs_end,device_info.j4fs_device_end));
+
+	if (!sb->s_root) {
+		iput(root);
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: error\n",__FUNCTION__,__LINE__));
+		goto failed;
+	}
+
+	sema_init(&device_info.grossLock, 1);
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 
 #ifdef J4FS_TRANSACTION_LOGGING
 	ret=fsd_initialize_transaction();
 
 	if (error(ret)) {
+<<<<<<< HEAD
 		T(J4FS_TRACE_ALWAYS,("%s %d: Error(nErr=0x%08x)\n",__FUNCTION__,__LINE__,ret));
    		goto failed;
 	}
 
 	T(J4FS_TRACE_FS,("%s %d: j4fs_next_sequence=0x%08x, j4fs_transaction_next_offset=0x%08x\n",__FUNCTION__,__LINE__,j4fs_next_sequence,j4fs_transaction_next_offset));
+=======
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: Error(nErr=0x%08x)\n",__FUNCTION__,__LINE__,ret));
+   		goto failed;
+	}
+
+	J4FS_T(J4FS_TRACE_FS,("%s %d: j4fs_next_sequence=0x%08x, j4fs_transaction_next_offset=0x%08x\n",__FUNCTION__,__LINE__,j4fs_next_sequence,j4fs_transaction_next_offset));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 #endif
 
 	ret=fsd_reclaim();
 
 	if (error(ret)) {
+<<<<<<< HEAD
 		T(J4FS_TRACE_ALWAYS,("%s %d: Error(nErr=0x%08x)\n",__FUNCTION__,__LINE__,ret));
+=======
+		J4FS_T(J4FS_TRACE_ALWAYS,("%s %d: Error(nErr=0x%08x)\n",__FUNCTION__,__LINE__,ret));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
    		goto failed;
 	}
 
@@ -1321,12 +1640,20 @@ failed:
 	return -EINVAL;
 }
 
+<<<<<<< HEAD
 
 int j4fs_get_sb(struct file_system_type *fs_type, int flags, const char *dev_name, void *data, struct vfsmount *mnt)
 {
 	T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
 
 	return get_sb_bdev(fs_type, flags, dev_name, data, j4fs_fill_super, mnt);
+=======
+struct dentry* j4fs_mount(struct file_system_type *fs_type, int flags, const char *dev_name, void *data)
+{
+	J4FS_T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+
+	return mount_bdev(fs_type, flags, dev_name, data, j4fs_fill_super);
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 }
 
 struct kmem_cache * j4fs_inode_cachep;
@@ -1335,7 +1662,11 @@ struct inode *j4fs_alloc_inode(struct super_block *sb)
 {
 	struct j4fs_inode_info *ei;
 
+<<<<<<< HEAD
 	T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+=======
+	J4FS_T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 
 	ei = (struct j4fs_inode_info *)kmem_cache_alloc(j4fs_inode_cachep, GFP_NOFS);
 	if (!ei)
@@ -1347,7 +1678,11 @@ struct inode *j4fs_alloc_inode(struct super_block *sb)
 
 void j4fs_destroy_inode(struct inode *inode)
 {
+<<<<<<< HEAD
 	T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+=======
+	J4FS_T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 
 	kmem_cache_free(j4fs_inode_cachep, J4FS_I(inode));
 }
@@ -1360,7 +1695,11 @@ void init_once(struct kmem_cache * cachep, void *foo)
 {
 	struct j4fs_inode_info *ei = (struct j4fs_inode_info *) foo;
 
+<<<<<<< HEAD
 	T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+=======
+	J4FS_T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 
 	rwlock_init(&ei->i_meta_lock);
 	inode_init_once(&ei->vfs_inode);
@@ -1386,7 +1725,11 @@ void destroy_inodecache(void)
 struct file_system_type j4fs_fs_type = {
 	.owner		= THIS_MODULE,
 	.name		= "j4fs",
+<<<<<<< HEAD
 	.get_sb		= j4fs_get_sb,
+=======
+	.mount		= j4fs_mount,
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 	.kill_sb	= kill_block_super,
 	.fs_flags	= FS_REQUIRES_DEV,
 };
@@ -1416,7 +1759,11 @@ ssize_t lfs_write(struct file *file, const char __user * buffer, size_t count, l
 	return -EINVAL;
 }
 
+<<<<<<< HEAD
 int j4fs_fsync(struct file *file, struct dentry *dentry, int datasync)
+=======
+int j4fs_fsync(struct file *file, int datasync)
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 {
 	return 0;
 }
@@ -1426,13 +1773,21 @@ int __init init_j4fs_fs(void)
 	int err;
 	j4fs_ctrl ctl;
 
+<<<<<<< HEAD
 	T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+=======
+	J4FS_T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 
 	err = init_inodecache();
 	if (err)
 		goto out1;
 
+<<<<<<< HEAD
 	T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+=======
+	J4FS_T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 
         err = register_filesystem(&j4fs_fs_type);
 	if (err)
@@ -1442,13 +1797,21 @@ int __init init_j4fs_fs(void)
 	lfs_read_module=lfs_read;
 	lfs_write_module=lfs_write;
 #endif
+<<<<<<< HEAD
 	T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+=======
+	J4FS_T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 
 	// Initialize j4fs_device_info
 	ctl.scmd=J4FS_INIT;
 	fsd_special(&ctl);
 
+<<<<<<< HEAD
 	T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+=======
+	J4FS_T(J4FS_TRACE_FS,("%s %d\n",__FUNCTION__,__LINE__));
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
 
 	return 0;
 out:
@@ -1523,4 +1886,7 @@ const struct super_operations j4fs_sops = {
 	.read_inode	= j4fs_read_inode,
 #endif
 };
+<<<<<<< HEAD
 
+=======
+>>>>>>> 097c5fb44c22f1d02b2d771fb35a8a3dd35609ea
